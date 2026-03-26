@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <i class="fas fa-store"></i> Sales & Service
+    </a>
+    <div class="navbar-links">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="products.html"><i class="fas fa-box"></i> Products</a>
+      <a href="service.html"><i class="fas fa-tools"></i> Services</a>
+      <a href="login.html" id="authLink"><i class="fas fa-user"></i> Login</a>
+      <button class="theme-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="auth-tabs mb-3" style="background: white; padding: 0.5rem; border-radius: 8px;">
+      <button class="active" onclick="showTab('request')" style="flex: 1; padding: 1rem; border: none; background: none; font-size: 1rem; font-weight: 600; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent;">
+        <i class="fas fa-plus-circle"></i> Request Service
+      </button>
+      <button onclick="showTab('track')" style="flex: 1; padding: 1rem; border: none; background: none; font-size: 1rem; font-weight: 600; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent;">
+        <i class="fas fa-search"></i> Track Status
+      </button>
+    </div>
+
+    <div id="requestTab" class="card slide-up">
+      <h2><i class="fas fa-tools"></i> Submit Service Request</h2>
+      <p class="mb-3">Fill out the form below to request a service for your computer, printer, or other devices.</p>
+      
+      <form onsubmit="submitService(event)">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Your Name</label>
+            <input type="text" id="serviceName" required placeholder="Enter your name">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" id="serviceEmail" required placeholder="Enter your email">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Phone</label>
+            <input type="tel" id="servicePhone" required placeholder="Enter your phone number">
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-wrench"></i> Service Type</label>
+          <select id="serviceType" required>
+            <option value="">Select service type</option>
+            <option value="Computer Repair">Computer Repair</option>
+            <option value="Printer Repair">Printer Repair</option>
+            <option value="CCTV Installation">CCTV Installation</option>
+            <option value="Software Installation">Software Installation</option>
+            <option value="AMC (Annual Maintenance)">AMC (Annual Maintenance)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-align-left"></i> Description</label>
+          <textarea id="serviceDescription" rows="4" required placeholder="Describe your issue in detail"></textarea>
+        </div>
+        <div id="serviceError" class="alert alert-error hidden"></div>
+        <div id="serviceSuccess" class="alert alert-success hidden"></div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      </form>
+    </div>
+
+    <div id="trackTab" class="card slide-up" style="display: none;">
+      <h2><i class="fas fa-search"></i> Track Your Service</h2>
+      <p class="mb-3">Enter your email to check the status of your service requests.</p>
+      
+      <div class="form-group">
+        <label><i class="fas fa-envelope"></i> Your Email</label>
+        <input type="email" id="trackEmail" required placeholder="Enter your email">
+      </div>
+      <button class="btn btn-primary" onclick="trackServices()">
+        <i class="fas fa-search"></i> Check Status
+      </button>
+
+      <div id="trackResults" class="mt-3"></div>
+    </div>
+
+    <div class="card slide-up mt-3">
+      <h2><i class="fas fa-info-circle"></i> Our Services</h2>
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-laptop"></i></div>
+          <h3>Computer Repair</h3>
+          <p>Professional computer repair services for all brands</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-print"></i></div>
+          <h3>Printer Repair</h3>
+          <p>Printer maintenance and repair services</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-video"></i></div>
+          <h3>CCTV Installation</h3>
+          <p>Complete CCTV security solutions</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+          <h3>AMC</h3>
+          <p>Annual maintenance contracts for businesses</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    function showTab(tab) {
+      document.getElementById('requestTab').style.display = tab === 'request' ? 'block' : 'none';
+      document.getElementById('trackTab').style.display = tab === 'track' ? 'block' : 'none';
+      
+      const buttons = document.querySelectorAll('.auth-tabs button');
+      buttons[0].classList.toggle('active', tab === 'request');
+      buttons[1].classList.toggle('active', tab === 'track');
+    }
+
+    async function submitService(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('serviceName').value;
+      const email = document.getElementById('serviceEmail').value;
+      const phone = document.getElementById('servicePhone').value;
+      const serviceType = document.getElementById('serviceType').value;
+      const description = document.getElementById('serviceDescription').value;
+      const errorDiv = document.getElementById('serviceError');
+      const successDiv = document.getElementById('serviceSuccess');
+
+      try {
+        const response = await fetch('http://localhost:5000/api/services/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, serviceType, description })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successDiv.textContent = 'Service request submitted successfully! Our team will contact you soon.';
+          successDiv.classList.remove('hidden');
+          errorDiv.classList.add('hidden');
+          event.target.reset();
+        } else {
+          errorDiv.textContent = data.message;
+          errorDiv.classList.remove('hidden');
+          successDiv.classList.add('hidden');
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Failed to submit request. Please try again.';
+        errorDiv.classList.remove('hidden');
+      }
+    }
+
+    async function trackServices() {
+      const email = document.getElementById('trackEmail').value;
+      const resultsDiv = document.getElementById('trackResults');
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/services');
+        const services = await response.json();
+        
+        const myServices = services.filter(s => s.email === email);
+        
+        if (myServices.length === 0) {
+          resultsDiv.innerHTML = '<div class="alert alert-warning">No service requests found for this email.</div>';
+          return;
+        }
+
+        resultsDiv.innerHTML = `
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service Type</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${myServices.map(service => `
+                  <tr>
+                    <td>${service.serviceType}</td>
+                    <td>${service.description.substring(0, 50)}...</td>
+                    <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
+                    <td>${new Date(service.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        resultsDiv.innerHTML = '<div class="alert alert-error">Error tracking services. Please try again.</div>';
+      }
+    }
+
+    // Check URL params for tab
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'track') {
+      showTab('track');
+    }
+
+    // Update auth link
+    const token = localStorage.getItem('token');
+    const authLink = document.getElementById('authLink');
+    if (token) {
+      authLink.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+      authLink.onclick = logout;
+    }
+  </script>
+</body>
+</html>

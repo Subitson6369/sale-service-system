@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service History - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="role-engineer">
+  <div class="dashboard-layout">
+    
+    <!-- Engineer Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-wrench" style="margin-right: 10px;"></i> Engineer Panel</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="engineer-dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="my-services.html" class="nav-item">
+          <i class="fa-solid fa-screwdriver-wrench"></i> My Services
+        </a>
+        <a href="update-status.html" class="nav-item">
+          <i class="fa-solid fa-pen-to-square"></i> Update Status
+        </a>
+        <a href="service-history.html" class="nav-item active">
+          <i class="fa-solid fa-clock-rotate-left"></i> Service History
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding: 0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y: auto;">
+      <header class="header engineer-only">
+        <div class="header-title">Third Eye Technologies Field Operations</div>
+        <div class="header-user">
+          <span style="font-weight: 500;">Field Engineer</span>
+          <div class="user-avatar" style="background-color: var(--secondary-color);">
+            <i class="fa-solid fa-helmet-safety"></i>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <h1 class="page-title">Service History</h1>
+
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Past Completed Services</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Req ID</th>
+                  <th>Customer Info</th>
+                  <th>Doorstep Address</th>
+                  <th>Device / Issue</th>
+                  <th>Status</th>
+                  <th>Update Action</th>
+                </tr>
+              </thead>
+              <tbody id="historyServiceBody">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:2.5rem;color:var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading service history...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Deep Update Status Modal for Engineer -->
+  <div class="modal" id="updateAssignedModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Resolve Doorstep Service</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="event.preventDefault(); alert('Service Details & Spare Parts Logged Successfully!'); closeModal('updateAssignedModal');">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Update Status</label>
+            <select class="form-control" required>
+              <option value="progress">In Progress</option>
+              <option value="waiting">Waiting for Parts</option>
+              <option value="completed">Completed (Create Invoice Trigger)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Service Type</label>
+            <input type="text" class="form-control" value="Hardware Visit" readonly>
+          </div>
+        </div>
+
+        <div class="form-group" style="padding: 1rem; background-color: #f8fafc; border: 1px dashed var(--border-color); border-radius: 6px;">
+          <label style="color: var(--primary-color);"><i class="fa-solid fa-microchip"></i> Spare Parts Used</label>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="text" class="form-control" placeholder="Item Name (e.g. Printer Roller)">
+            <input type="number" class="form-control" placeholder="Cost (₹)" style="width: 120px;">
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">Entering spare parts automatically calculates on the final customer invoice.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Engineer Service Notes</label>
+          <textarea class="form-control" rows="3" placeholder="Describe the resolution provided to the customer..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-check"></i> Submit Resolution & Complete Job</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- OTP Verification Modal -->
+  <div class="modal" id="otpModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Verify Customer</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="event.preventDefault(); alert('OTP Verified Successfully! Service status changed to \'Service Started\'.'); closeModal('otpModal');">
+        <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Ask the customer for the 4-digit OTP displayed on their screen.</p>
+        <div class="otp-box" style="margin-bottom: 1.5rem;">
+          <input type="text" class="form-control otp-number" placeholder="• • • •" maxlength="4" style="text-align: center; letter-spacing: 0.5rem;" required pattern="\d{4}">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-unlock" style="margin-right:8px;"></i> Verify & Start Service</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Engineer GPS Tracking Simulation Modal -->
+  <div class="modal" id="mapModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Route Navigation</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div style="padding: 1rem 0;">
+        <p style="margin-bottom:0.5rem; font-weight:600;"><i class="fa-solid fa-truck-fast" style="color:var(--primary-color);"></i> Route calculated (14 mins away)</p>
+        <div class="map-placeholder" style="height: 250px; margin-top:1rem;">
+          <i class="fa-solid fa-diamond-turn-right" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 8px;"></i>
+          <p>Navigating to location...</p>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width: 100%;" onclick="closeModal('mapModal')">Close Map</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', loadHistoryServices);
+
+    async function loadHistoryServices() {
+      const tbody = document.getElementById('historyServiceBody');
+      const userId = localStorage.getItem('userId');
+      
+      if (!userId) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#ef4444;">User session error. Please log in again.</td></tr>';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/services/engineer/' + userId);
+        const allMyServices = await res.json();
+        
+        // Filter for completed services
+        const completedServices = allMyServices.filter(s => s.status === 'Completed' || s.status === 'Cancelled');
+        
+        renderHistoryServices(completedServices);
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#ef4444;">Failed to load history.</td></tr>';
+      }
+    }
+
+    function renderHistoryServices(list) {
+      const tbody = document.getElementById('historyServiceBody');
+      
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--text-muted);">
+          <i class="fa-solid fa-clock-rotate-left" style="font-size:2.5rem;opacity:.2;display:block;margin-bottom:.75rem;"></i>
+          <strong>No service history found.</strong><br>
+          <span style="font-size:.85rem;">Completed jobs will appear here once finalized.</span>
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(s => {
+        const sid = '#SRV-' + s._id.slice(-6).toUpperCase();
+        const badgeCls = s.status === 'Completed' ? 'badge-success' : 'badge-danger';
+
+        return `<tr>
+          <td style="font-family:monospace;font-size:.82rem;">${sid}</td>
+          <td>
+            <p style="font-weight: 600; margin: 0;">${s.name}</p>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-phone"></i> ${s.phone}</p>
+          </td>
+          <td>${s.address || '—'}</td>
+          <td>${s.serviceType}<br><small style="color:var(--text-muted)">${s.description || ''}</small></td>
+          <td><span class="badge ${badgeCls}">${s.status}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline" style="border: 1px solid var(--border-color);"><i class="fa-solid fa-eye"></i> View</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>

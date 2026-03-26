@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Inline navbar for customer view */
+    .navbar {
+      background-color: #1e1b4b;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .navbar-brand { font-size: 1.5rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 0.75rem; }
+    .navbar-brand i { color: var(--primary-color); }
+    .navbar-menu { display: flex; gap: 1.5rem; align-items: center; }
+    .navbar-menu a { color: rgba(255, 255, 255, 0.8); font-weight: 500; }
+    .navbar-menu a:hover, .navbar-menu a.active { color: white; }
+  </style>
+</head>
+<body>
+  
+  <div class="dashboard-layout">
+    
+    <!-- Admin Sidebar -->
+    <aside class="sidebar admin-only">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-desktop" style="margin-right: 10px;"></i> Admin Panel</h2>
+      </div>
+            <nav class="sidebar-nav">
+        <a href="admin-dashboard.html" class="nav-item ">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="products.html" class="nav-item active">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="services.html" class="nav-item ">
+          <i class="fa-solid fa-screwdriver-wrench"></i> Services
+        </a>
+        <a href="engineers.html" class="nav-item ">
+          <i class="fa-solid fa-user-gear"></i> Service Engineers
+        </a>
+        <a href="assign-service.html" class="nav-item ">
+          <i class="fa-solid fa-clipboard-list"></i> Assign Service
+        </a>
+        <a href="billing.html" class="nav-item ">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+        </a>
+        <a href="payments.html" class="nav-item ">
+          <i class="fa-solid fa-credit-card"></i> Payments
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding: 0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y: auto;">
+      
+      <!-- Customer Navbar -->
+      <nav class="navbar customer-only">
+        <a href="customer-dashboard.html" class="navbar-brand">
+          <img src="images/logo.png" alt="Third Eye Technologies" class="shop-logo">
+        </a>
+        <div class="navbar-menu">
+          <a href="customer-dashboard.html">Dashboard</a>
+          <a href="products.html" class="active">Products</a>
+          <a href="services.html">Services</a>
+          <a href="billing.html">Invoices</a>
+          <a href="cart.html" style="position:relative">
+            <i class="fa-solid fa-cart-shopping"></i> Cart
+            <span id="cartBadge" style="position:absolute;top:-8px;right:-10px;background:var(--primary-color);color:white;border-radius:50%;width:18px;height:18px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;">0</span>
+          </a>
+          <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+      </nav>
+
+      <!-- Admin Header -->
+      <header class="header admin-only">
+        <div class="header-title">Third Eye Technologies</div>
+        <div class="header-user">
+          <span style="font-weight: 500;">Admin User</span>
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        </div>
+      </header>
+
+      <!-- Shared Content Wrapper -->
+      <div class="content-wrapper" style="max-width: 1200px; margin: 0 auto; width: 100%;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h1 class="page-title customer-only" style="margin: 0;">Our Products</h1>
+          <h1 class="page-title admin-only" style="margin: 0;">Manage Products</h1>
+          <!-- Admin Action -->
+          <button class="btn btn-primary admin-only" onclick="openModal('addProductModal')">
+            <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Add Product
+          </button>
+        </div>
+
+        <!-- Dynamic Products Grid -->
+        <div class="products-grid" id="productsContainer">
+          <!-- Products will be injected here via JavaScript -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Admin Modals -->
+  <div class="modal" id="addProductModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Add New Product</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="addProduct(event)" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="prodName" class="form-control" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Price (â‚¹)</label>
+            <input type="number" id="prodPrice" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Initial Stock</label>
+            <input type="number" id="prodStock" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="prodCategory" class="form-control" required>
+            <option value="Computer">Computer</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Printer">Printer</option>
+            <option value="CCTV">CCTV Camera</option>
+            <option value="Accessory">Accessory</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Product Description</label>
+          <textarea id="prodDesc" class="form-control" rows="2" placeholder="Brief details about specs..."></textarea>
+        </div>
+        <!-- IMPORTANT: The File Upload Field -->
+        <div class="form-group" style="padding: 10px; background: #e2e8f0; border-radius: 6px; border: 1px dashed var(--primary-color);">
+          <label style="color: var(--primary-color); font-weight: 600;"><i class="fa-solid fa-image"></i> Product Image Upload</label>
+          <input type="file" id="prodImage" name="image" class="form-control" accept="image/png, image/jpeg, image/webp" style="background: white;">
+          <small style="color: var(--text-muted);">Max size 5MB (JPG, PNG, WEBP)</small>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload & Save Product</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div class="modal" id="updateProductModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size:1.25rem;"><i class="fa-solid fa-pen-to-square" style="color:#4f46e5;"></i> Edit Product</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="updateProduct(event)">
+        <input type="hidden" id="editProdId">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="editProdName" class="form-control" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label>Price (&#8377;)</label>
+            <input type="number" id="editProdPrice" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input type="number" id="editProdStock" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="editProdCategory" class="form-control" required>
+            <option value="Computer">Computer</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Printer">Printer</option>
+            <option value="CCTV">CCTV Camera</option>
+            <option value="Accessory">Accessory</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="editProdDesc" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="form-group" style="padding:10px;background:#e2e8f0;border-radius:6px;border:1px dashed var(--primary-color);">
+          <label style="color:var(--primary-color);font-weight:600;"><i class="fa-solid fa-image"></i> Change Image (optional)</label>
+          <input type="file" id="editProdImage" name="image" class="form-control" accept="image/png,image/jpeg,image/webp" style="background:white;">
+          <small style="color:var(--text-muted);">Leave blank to keep existing image</small>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">
+          <i class="fa-solid fa-floppy-disk"></i> Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => { fetchProducts(); updateCartBadge(); });
+
+    // â”€â”€â”€ Cart badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function updateCartBadge() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const badge = document.getElementById('cartBadge');
+      if (badge) badge.textContent = cart.reduce((s,i) => s+i.qty, 0);
+    }
+
+    function addToCart(product) {
+      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existing = cart.find(i => i._id === product._id);
+      if (existing) existing.qty += 1;
+      else cart.push({ ...product, qty: 1 });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+      const t = document.createElement('div');
+      t.innerHTML = `&#10003; ${product.name} added to cart!`;
+      t.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#4f46e5;color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    // â”€â”€â”€ Fetch & render products â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function fetchProducts() {
+      try {
+        const res      = await fetch('/api/products');
+        const products = await res.json();
+        const container = document.getElementById('productsContainer');
+        container.innerHTML = '';
+
+        if (!products.length) {
+          container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:3rem;">No products found. Add your first product!</p>';
+          return;
+        }
+
+        products.forEach(p => {
+          const imgHtml = p.image
+            ? `<div class="product-img" style="background:transparent;padding:0;overflow:hidden;"><img src="/uploads/products/${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;"></div>`
+            : `<div class="product-img"><i class="fa-solid fa-box-open"></i></div>`;
+
+          const stockBadge = p.stock > 0
+            ? `<span class="badge badge-success" style="font-size:.7rem;">In Stock (${p.stock})</span>`
+            : `<span class="badge badge-danger" style="font-size:.7rem;">Out of Stock</span>`;
+
+          // Admin buttons: Edit + Delete
+          const adminBtns = `
+            <button class="btn admin-only" style="flex:1;border:1px solid #4f46e5;color:#4f46e5;background:white;"
+              onclick='openEditModal(${JSON.stringify(p)})'>
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+            <button class="btn admin-only" style="background:#ef4444;color:white;padding:.4rem .7rem;border:none;border-radius:6px;cursor:pointer;"
+              onclick="deleteProduct('${p._id}', '${p.name.replace(/'/g,'\\&apos;')}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>`;
+
+          // Customer button
+          const customerBtn = `
+            <button class="btn btn-primary customer-only" style="flex:1;"
+              onclick='addToCart(${JSON.stringify({_id:p._id,name:p.name,price:p.price,image:p.image||null})})'>
+              <i class="fa-solid fa-cart-plus"></i> Add to Cart
+            </button>`;
+
+          container.innerHTML += `
+            <div class="product-card" id="pcard-${p._id}">
+              ${imgHtml}
+              <div class="product-info">
+                <h3>${p.name}</h3>
+                <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap;">
+                  <span class="badge badge-warning" style="font-size:.7rem;">${p.category||'Item'}</span>
+                  ${stockBadge}
+                </div>
+                <div class="product-price">&#8377;${p.price.toLocaleString()}</div>
+                <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;">
+                  ${customerBtn}
+                  ${adminBtns}
+                </div>
+              </div>
+            </div>`;
+        });
+      } catch (err) {
+        console.error('Failed to load products', err);
+      }
+    }
+
+    // â”€â”€â”€ ADD product â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function addProduct(event) {
+      event.preventDefault();
+      const formData = new FormData();
+      formData.append('name',        document.getElementById('prodName').value);
+      formData.append('price',       document.getElementById('prodPrice').value);
+      formData.append('stock',       document.getElementById('prodStock').value);
+      formData.append('category',    document.getElementById('prodCategory').value);
+      formData.append('description', document.getElementById('prodDesc').value);
+      const file = document.getElementById('prodImage').files[0];
+      if (file) formData.append('image', file);
+
+      try {
+        const token = localStorage.getItem('userToken');
+        const res   = await fetch('/api/products/add', {
+          method:'POST',
+          headers:{ 'Authorization':'Bearer ' + token },
+          body: formData
+        });
+        const result = await res.json();
+        if (res.ok) {
+          showToast('Product added successfully!');
+          closeModal('addProductModal');
+          document.getElementById('prodName').value = '';
+          document.getElementById('prodPrice').value = '';
+          document.getElementById('prodStock').value = '';
+          document.getElementById('prodDesc').value = '';
+          document.getElementById('prodImage').value = '';
+          fetchProducts();
+        } else {
+          showToast('Error: ' + (result.message || result.error), '#ef4444');
+        }
+      } catch (e) {
+        showToast('Server error during upload.', '#ef4444');
+      }
+    }
+
+    // â”€â”€â”€ EDIT: open modal pre-filled â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function openEditModal(p) {
+      document.getElementById('editProdId').value       = p._id;
+      document.getElementById('editProdName').value     = p.name;
+      document.getElementById('editProdPrice').value    = p.price;
+      document.getElementById('editProdStock').value    = p.stock;
+      document.getElementById('editProdCategory').value = p.category || 'Computer';
+      document.getElementById('editProdDesc').value     = p.description || '';
+      document.getElementById('editProdImage').value    = '';
+      openModal('updateProductModal');
+    }
+
+    // â”€â”€â”€ UPDATE product â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function updateProduct(event) {
+      event.preventDefault();
+      const id = document.getElementById('editProdId').value;
+
+      // First update text fields
+      try {
+        const token = localStorage.getItem('userToken');
+        const res = await fetch('/api/products/update/' + id, {
+          method: 'PUT',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            name:        document.getElementById('editProdName').value,
+            price:       document.getElementById('editProdPrice').value,
+            stock:       document.getElementById('editProdStock').value,
+            category:    document.getElementById('editProdCategory').value,
+            description: document.getElementById('editProdDesc').value
+          })
+        });
+        const result = await res.json();
+        if (!res.ok) { showToast('Update error: ' + (result.message || result.error), '#ef4444'); return; }
+      } catch(e) {
+        showToast('Network error during update.', '#ef4444'); return;
+      }
+
+      // If a new image was selected, upload it separately
+      const imageFile = document.getElementById('editProdImage').files[0];
+      if (imageFile) {
+        const imgForm = new FormData();
+        imgForm.append('image', imageFile);
+        try {
+          const token = localStorage.getItem('userToken');
+          await fetch('/api/products/' + id + '/image', {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: imgForm
+          });
+        } catch(e) { console.warn('Image update failed', e); }
+      }
+
+      showToast('Product updated successfully!');
+      closeModal('updateProductModal');
+      fetchProducts();
+    }
+
+    // â”€â”€â”€ DELETE product â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function deleteProduct(id, name) {
+      if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+      try {
+        const token = localStorage.getItem('userToken');
+        const res   = await fetch('/api/products/delete/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const result = await res.json();
+        if (res.ok) {
+          showToast('Product deleted.');
+          // Animate removal
+          const card = document.getElementById('pcard-' + id);
+          if (card) { card.style.opacity='0'; card.style.transform='scale(.9)'; card.style.transition='all .3s'; setTimeout(()=>card.remove(), 300); }
+        } else {
+          showToast('Delete error: ' + (result.message||result.error), '#ef4444');
+        }
+      } catch(e) {
+        showToast('Network error.', '#ef4444');
+      }
+    }
+
+    // â”€â”€â”€ Toast helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function showToast(msg, bg='#16a34a') {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = `position:fixed;bottom:30px;right:30px;background:${bg};color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);`;
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 2500);
+    }
+  </script>
+</body>
+</html>

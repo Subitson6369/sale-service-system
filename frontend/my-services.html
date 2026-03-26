@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Services - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="role-engineer">
+  <div class="dashboard-layout">
+    
+    <!-- Engineer Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-wrench" style="margin-right: 10px;"></i> Engineer Panel</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="engineer-dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="my-services.html" class="nav-item active">
+          <i class="fa-solid fa-screwdriver-wrench"></i> My Services
+        </a>
+        <a href="update-status.html" class="nav-item">
+          <i class="fa-solid fa-pen-to-square"></i> Update Status
+        </a>
+        <a href="service-history.html" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> Service History
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding: 0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y: auto;">
+      <header class="header engineer-only">
+        <div class="header-title">Third Eye Technologies Field Operations</div>
+        <div class="header-user">
+          <span style="font-weight: 500;">Field Engineer</span>
+          <div class="user-avatar" style="background-color: var(--secondary-color);">
+            <i class="fa-solid fa-helmet-safety"></i>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <h1 class="page-title">Doorstep Service Queue</h1>
+
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Dispatched Services To You</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Req ID</th>
+                  <th>Customer Info</th>
+                  <th>Doorstep Address</th>
+                  <th>Device / Issue</th>
+                  <th>Status</th>
+                  <th>Update Action</th>
+                </tr>
+              </thead>
+              <tbody id="engineerServiceBody">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:2.5rem;color:var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading assigned services...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Deep Update Status Modal for Engineer -->
+  <div class="modal" id="updateAssignedModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Resolve Doorstep Service</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form id="resolutionForm">
+        <input type="hidden" id="resolutionServiceId">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label>Update Status</label>
+            <select class="form-control" id="completionStatus" required>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed (Finalize)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Service Type</label>
+            <input type="text" class="form-control" value="Hardware Visit" readonly>
+          </div>
+        </div>
+
+        <div class="form-group" style="padding: 1rem; background-color: #f8fafc; border: 1px dashed var(--border-color); border-radius: 6px;">
+          <label style="color: var(--primary-color);"><i class="fa-solid fa-microchip"></i> Spare Parts Used</label>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="text" id="partName" class="form-control" placeholder="Item Name">
+            <input type="number" id="partCost" class="form-control" placeholder="Cost" style="width: 120px;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Engineer Service Notes</label>
+          <textarea class="form-control" id="serviceNotes" rows="3" placeholder="Describe the resolution provided..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="resSubmitBtn"><i class="fa-solid fa-check"></i> Submit & Update Status</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- OTP Verification Modal -->
+  <div class="modal" id="otpModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Verify Customer</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form id="otpForm">
+        <input type="hidden" id="otpServiceId">
+        <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Ask the customer for the 4-digit OTP displayed on their screen.</p>
+        <div class="otp-box" style="margin-bottom: 1.5rem;">
+          <input type="text" id="otpInput" class="form-control otp-number" placeholder="• • • •" maxlength="4" style="text-align: center; letter-spacing: 0.5rem;" required pattern="\d{4}">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="otpSubmitBtn"><i class="fa-solid fa-unlock" style="margin-right:8px;"></i> Verify & Start Service</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Engineer GPS Tracking Simulation Modal -->
+  <div class="modal" id="mapModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Route Navigation</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div style="padding: 1rem 0;">
+        <p style="margin-bottom:0.5rem; font-weight:600;"><i class="fa-solid fa-truck-fast" style="color:var(--primary-color);"></i> Route calculated (14 mins away)</p>
+        <div class="map-placeholder" style="height: 250px; margin-top:1rem;">
+          <i class="fa-solid fa-diamond-turn-right" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 8px;"></i>
+          <p>Navigating to location...</p>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width: 100%;" onclick="closeModal('mapModal')">Close Map</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', loadEngineerServices);
+
+    async function loadEngineerServices() {
+      const tbody = document.getElementById('engineerServiceBody');
+      const userId = localStorage.getItem('userId');
+      
+      if (!userId) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#ef4444;">User session error. Please log in again.</td></tr>';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/services/engineer/' + userId);
+        const allMyServices = await res.json();
+        
+        // Filter for active services (Assigned or In Progress)
+        const activeServices = allMyServices.filter(s => s.status === 'Assigned' || s.status === 'In Progress');
+        
+        renderEngineerServices(activeServices);
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#ef4444;">Failed to load services.</td></tr>';
+      }
+    }
+
+    // Update rendering to pass service ID to modals
+    function renderEngineerServices(list) {
+      const tbody = document.getElementById('engineerServiceBody');
+      
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--text-muted);">
+          <i class="fa-solid fa-clipboard-check" style="font-size:2.5rem;opacity:.2;display:block;margin-bottom:.75rem;"></i>
+          <strong>No active assignments.</strong><br>
+          <span style="font-size:.85rem;">Check back later for new dispatches.</span>
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(s => {
+        const sid = '#SRV-' + s._id.slice(-6).toUpperCase();
+        const badgeCls = s.status === 'In Progress' ? 'badge-progress' : 'badge-assigned';
+        const actionBtn = s.status === 'Assigned' 
+          ? `<button class="btn btn-sm btn-primary" onclick="openActionModal('otpModal', '${s._id}')"><i class="fa-solid fa-key"></i> Enter OTP</button>`
+          : `<button class="btn btn-sm btn-primary" onclick="openActionModal('updateAssignedModal', '${s._id}')"><i class="fa-solid fa-flag-checkered"></i> Complete Job</button>`;
+
+        return `<tr>
+          <td style="font-family:monospace;font-size:.82rem;">${sid}</td>
+          <td>
+            <p style="font-weight: 600; margin: 0;">${s.name}</p>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-phone"></i> ${s.phone}</p>
+          </td>
+          <td>
+            ${s.address || 'No address'}<br>
+            <div style="margin-top: 5px;">
+              <button class="btn btn-sm" style="background:#f1f5f9; color:var(--text-dark); border:1px solid var(--border-color);" onclick="window.open('https://maps.google.com/?q=' + encodeURIComponent('${s.address}'), '_blank')">
+                <i class="fa-solid fa-location-arrow" style="color:var(--primary-color);"></i> Navigate
+              </button>
+            </div>
+          </td>
+          <td>${s.serviceType}<br><small style="color:var(--text-muted)">${s.description || ''}</small></td>
+          <td><span class="badge ${badgeCls}">${s.status}</span></td>
+          <td>${actionBtn}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function openActionModal(modalId, serviceId) {
+      if (modalId === 'otpModal') {
+        document.getElementById('otpServiceId').value = serviceId;
+      } else if (modalId === 'updateAssignedModal') {
+        document.getElementById('resolutionServiceId').value = serviceId;
+      }
+      openModal(modalId);
+    }
+
+    // OTP Submit logic
+    document.getElementById('otpForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const sid = document.getElementById('otpServiceId').value;
+      const btn = document.getElementById('otpSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+      try {
+        const res = await fetch('/api/services/update/' + sid, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'In Progress' })
+        });
+        if (res.ok) {
+          showToast('✅ OTP Verified! Service Started.');
+          closeModal('otpModal');
+          loadEngineerServices();
+        } else {
+          showToast('Failed to update status', '#ef4444');
+        }
+      } catch (err) {
+        showToast('Network error', '#ef4444');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-unlock" style="margin-right:8px;"></i> Verify & Start Service';
+      }
+    };
+
+    // Resolution Submit logic
+    document.getElementById('resolutionForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const sid = document.getElementById('resolutionServiceId').value;
+      const status = document.getElementById('completionStatus').value;
+      const notes = document.getElementById('serviceNotes').value;
+      const pName = document.getElementById('partName').value;
+      const pCost = document.getElementById('partCost').value;
+      const btn = document.getElementById('resSubmitBtn');
+      
+      const updatePayload = { 
+        status, 
+        engineerNotes: notes 
+      };
+
+      if (pName && pCost) {
+        updatePayload.spareParts = [{ name: pName, cost: parseFloat(pCost) }];
+      }
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+      try {
+        const res = await fetch('/api/services/update/' + sid, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatePayload)
+        });
+        if (res.ok) {
+          showToast('✅ Job updated successfully!');
+          closeModal('updateAssignedModal');
+          loadEngineerServices();
+        } else {
+          showToast('Failed to update job', '#ef4444');
+        }
+      } catch (err) {
+        showToast('Network error', '#ef4444');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Submit & Update Status';
+      }
+    };
+
+    function showToast(msg, bg='#16a34a') {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = `position:fixed;bottom:30px;right:30px;background:${bg};color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);`;
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 3000);
+    }
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>

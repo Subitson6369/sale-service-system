@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .navbar {
+      background-color: #1e1b4b;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .navbar-brand { font-size: 1.5rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 0.75rem; }
+    .navbar-brand i { color: var(--primary-color); }
+    .navbar-menu { display: flex; gap: 1.5rem; align-items: center; }
+    .navbar-menu a { color: rgba(255, 255, 255, 0.8); font-weight: 500; }
+    .navbar-menu a:hover, .navbar-menu a.active { color: white; }
+    .dual-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
+    @media (max-width: 768px) { .dual-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  
+  <div class="dashboard-layout">
+    
+    <!-- Admin Sidebar -->
+    <aside class="sidebar admin-only">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-desktop" style="margin-right: 10px;"></i> Admin Panel</h2>
+      </div>
+            <nav class="sidebar-nav">
+        <a href="admin-dashboard.html" class="nav-item ">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="products.html" class="nav-item ">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="services.html" class="nav-item active">
+          <i class="fa-solid fa-screwdriver-wrench"></i> Services
+        </a>
+        <a href="engineers.html" class="nav-item ">
+          <i class="fa-solid fa-user-gear"></i> Service Engineers
+        </a>
+        <a href="assign-service.html" class="nav-item ">
+          <i class="fa-solid fa-clipboard-list"></i> Assign Service
+        </a>
+        <a href="billing.html" class="nav-item ">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+        </a>
+        <a href="payments.html" class="nav-item ">
+          <i class="fa-solid fa-credit-card"></i> Payments
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding: 0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y: auto;">
+      
+      <!-- Customer Navbar -->
+      <nav class="navbar customer-only">
+        <a href="customer-dashboard.html" class="navbar-brand">
+          <img src="images/logo.png" alt="Third Eye Technologies" class="shop-logo">
+        </a>
+        <div class="navbar-menu">
+          <a href="customer-dashboard.html">Dashboard</a>
+          <a href="products.html">Products</a>
+          <a href="services.html" class="active">Services</a>
+          <a href="billing.html">Invoices</a>
+          <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+      </nav>
+
+      <!-- Admin Header -->
+      <header class="header admin-only">
+        <div class="header-title">Third Eye Technologies</div>
+        <div class="header-user">
+          <span style="font-weight: 500;">Admin User</span>
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        </div>
+      </header>
+
+      <!-- Shared Content Wrapper -->
+      <div class="content-wrapper" style="max-width: 1200px; margin: 0 auto; width: 100%;">
+        <h1 class="page-title">Service Management</h1>
+
+        <div class="dual-layout">
+          <!-- Submit Service Request Form (Customer) -->
+          <div class="panel-form customer-only">
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">
+              <i class="fa-solid fa-plus-circle"></i> Submit Service Request
+            </h3>
+            <form id="serviceForm" onsubmit="submitServiceRequest(event)">
+              <div class="form-group">
+                <label for="custName">Customer Name</label>
+                <input type="text" id="custName" class="form-control" required placeholder="Full Name">
+              </div>
+              <div class="form-group">
+                <label for="custPhone">Phone Number</label>
+                <input type="tel" id="custPhone" class="form-control" required placeholder="+91-">
+              </div>
+              <div class="form-group">
+                <label for="custAddress">Doorstep Service Address</label>
+                <textarea id="custAddress" class="form-control" rows="2" placeholder="Full Address with Landmark" required></textarea>
+                
+                <!-- Map Location Picker -->
+                <div style="margin-top: 1rem;">
+                  <button type="button" class="btn btn-sm" style="background:#f1f5f9; color:var(--text-dark); border:1px solid var(--border-color);" onclick="pinLocation()"><i class="fa-solid fa-location-crosshairs" style="color:var(--danger);"></i> Pin Current Location</button>
+                  <p id="geoStatus" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Click to find your exact location using GPS.</p>
+                  <p id="geoSuccess" style="font-size: 0.85rem; color: var(--success); margin-top: 5px; display: none;"><i class="fa-solid fa-check-circle"></i> GPS Location Captured: <span id="geoCoords" style="font-weight:600;"></span></p>
+                  <div id="googleMapFrame" style="display:none; margin-top: 10px; width: 100%; height: 250px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color);">
+                     <iframe id="mapIframe" width="100%" height="100%" frameborder="0" style="border:0" allowfullscreen></iframe>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="deviceType">Device Type</label>
+                <select id="deviceType" class="form-control" required>
+                  <option value="" disabled selected>Select service type...</option>
+                  <option value="laptop">Laptop Repair</option>
+                  <option value="desktop">Computer Repair</option>
+                  <option value="printer">Printer Service</option>
+                  <option value="cctv_install">CCTV Installation</option>
+                  <option value="cctv_maint">CCTV Maintenance</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="issueDesc">Issue Description</label>
+                <textarea id="issueDesc" class="form-control" rows="4" placeholder="Describe the problem..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="date">Preferred Date</label>
+                <input type="date" id="date" class="form-control" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Request</button>
+            </form>
+          </div>
+
+          <!-- Services List (live from API) -->
+          <div class="table-card" style="grid-column: span 1;" id="serviceTableWrapper">
+            <div class="table-header">
+              <h3><span class="customer-only">Your Service Requests</span><span class="admin-only">All Service Requests</span></h3>
+              <a href="assign-service.html" class="btn btn-sm btn-primary admin-only"><i class="fa-solid fa-clipboard-list"></i> Manage Assignments</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Req ID</th>
+                    <th class="admin-only">Customer</th>
+                    <th>Service Type</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="admin-only">Assigned To</th>
+                    <th class="admin-only">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="serviceTableBody">
+                  <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Quick Assign Modal (from services.html) -->
+  <div class="modal" id="quickAssignModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size:1.25rem;"><i class="fa-solid fa-user-gear" style="color:#4f46e5;margin-right:8px;"></i>Assign Engineer</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div style="margin-bottom:1rem;font-size:.9rem;color:var(--text-muted);" id="qaServiceInfo"></div>
+      <form onsubmit="quickAssignSubmit(event)">
+        <input type="hidden" id="qaServiceId">
+        <div class="form-group">
+          <label>Select Engineer</label>
+          <select id="qaEngineerId" class="form-control" required>
+            <option value="" disabled selected>Loading...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="qaPriority" class="form-control">
+            <option value="Normal">Normal</option>
+            <option value="High">High Priority</option>
+            <option value="Emergency">🚨 Emergency</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;" id="qaSubmitBtn">
+          <i class="fa-solid fa-paper-plane"></i> Assign &amp; Dispatch
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let qaEngineers = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const role = localStorage.getItem('userRole');
+      if (role === 'admin') {
+        const wrapper = document.getElementById('serviceTableWrapper');
+        if (wrapper) wrapper.style.gridColumn = '1 / -1';
+      }
+      loadServiceTable();
+      loadEngineersForModal();
+
+      // Delegated click for assign buttons (uses data-* attributes)
+      document.getElementById('serviceTableBody')?.addEventListener('click', e => {
+        const btn = e.target.closest('.qa-assign-btn');
+        if (btn) openQuickAssign(btn.dataset.id, btn.dataset.name, btn.dataset.type);
+      });
+    });
+
+    async function loadServiceTable() {
+      try {
+        const res      = await fetch('/api/services');
+        const services = await res.json();
+        const role     = localStorage.getItem('userRole');
+        const tbody    = document.getElementById('serviceTableBody');
+
+        if (!services.length) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);">No service requests yet.</td></tr>';
+          return;
+        }
+
+        const badgeMap = { Pending:'badge-warning', Assigned:'badge-info', 'In Progress':'badge-warning', Completed:'badge-success', Cancelled:'badge-danger' };
+
+        tbody.innerHTML = services.map(s => {
+          const sid     = '#SRV-' + s._id.slice(-6).toUpperCase();
+          const badge   = badgeMap[s.status] || 'badge-warning';
+          const date    = s.preferredDate || new Date(s.createdAt).toLocaleDateString('en-IN');
+          const engCell = s.engineerName
+            ? `<span style="font-weight:600;">${s.engineerName}</span>`
+            : `<span style="color:#94a3b8;font-size:.82rem;">Not assigned</span>`;
+          const adminAction = `
+            <button class="action-btn qa-assign-btn" title="Assign Engineer"
+              data-id="${s._id}" data-name="${(s.name||'').replace(/"/g,'&quot;')}" data-type="${s.serviceType}">
+              <i class="fa-solid fa-user-plus"></i>
+            </button>
+            <a href="assign-service.html" class="action-btn" title="Manage"><i class="fa-solid fa-pen"></i></a>`;
+
+          return `<tr>
+            <td style="font-family:monospace;font-size:.82rem;">${sid}</td>
+            <td class="admin-only" style="font-weight:600;">${s.name}</td>
+            <td>${s.serviceType}</td>
+            <td style="font-size:.83rem;">${date}</td>
+            <td><span class="badge ${badge}">${s.status}</span></td>
+            <td class="admin-only">${engCell}</td>
+            <td class="admin-only">${adminAction}</td>
+          </tr>`;
+        }).join('');
+      } catch(e) {
+        console.error('Service load error', e);
+      }
+    }
+
+    async function loadEngineersForModal() {
+      try {
+        const res = await fetch('/api/auth/engineers');
+        qaEngineers = await res.json();
+        const sel = document.getElementById('qaEngineerId');
+        if (sel) {
+          sel.innerHTML = qaEngineers.length
+            ? '<option value="" disabled selected>Select engineer...</option>' +
+              qaEngineers.map((e, i) => `<option value="${e._id}">ENG-${String(i+1).padStart(3,'0')} · ${e.name}</option>`).join('')
+            : '<option value="" disabled>No engineers registered</option>';
+        }
+      } catch(e) {}
+    }
+
+    function openQuickAssign(serviceId, custName, serviceType) {
+      document.getElementById('qaServiceId').value = serviceId;
+      document.getElementById('qaServiceInfo').textContent = `${serviceType} – ${custName}`;
+      openModal('quickAssignModal');
+    }
+
+    async function quickAssignSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('qaSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Assigning...';
+      const serviceId  = document.getElementById('qaServiceId').value;
+      const engineerId = document.getElementById('qaEngineerId').value;
+      const priority   = document.getElementById('qaPriority').value;
+      try {
+        const res = await fetch('/api/services/assign/' + serviceId, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('userToken') },
+          body: JSON.stringify({ engineerId, priority })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const t = document.createElement('div');
+          t.textContent = '✅ Engineer assigned!';
+          t.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#16a34a;color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;';
+          document.body.appendChild(t); setTimeout(()=>t.remove(), 2500);
+          closeModal('quickAssignModal');
+          loadServiceTable();
+        } else {
+          alert('Error: ' + (data.message || data.error));
+        }
+      } catch(err) { alert('Network error.'); }
+      finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Assign &amp; Dispatch';
+      }
+    }
+
+    // Customer: Submit service request to backend
+    async function submitServiceRequest(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      const payload = {
+        name:          document.getElementById('custName').value,
+        phone:         document.getElementById('custPhone').value,
+        email:         localStorage.getItem('userEmail') || 'customer@example.com',
+        address:       document.getElementById('custAddress').value,
+        serviceType:   document.getElementById('deviceType').value,
+        description:   document.getElementById('issueDesc').value,
+        preferredDate: document.getElementById('date').value
+      };
+      try {
+        const res = await fetch('/api/services/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const t = document.createElement('div');
+          t.textContent = '✅ Service request submitted! We will contact you soon.';
+          t.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#16a34a;color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;max-width:320px;';
+          document.body.appendChild(t); setTimeout(()=>t.remove(), 3500);
+          e.target.reset();
+          loadServiceTable();
+        } else {
+          alert('Submission failed: ' + (data.message || data.error));
+        }
+      } catch(err) {
+        alert('Network error. Check connection.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function pinLocation() {
+      const geoStatus = document.getElementById('geoStatus');
+      const geoSuccess = document.getElementById('geoSuccess');
+      const mapFrame = document.getElementById('googleMapFrame');
+      const mapIframe = document.getElementById('mapIframe');
+      const coordsText = document.getElementById('geoCoords');
+      
+      geoStatus.textContent = 'Requesting GPS permissions...';
+      geoStatus.style.display = 'block';
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            geoStatus.style.display = 'none';
+            geoSuccess.style.display = 'block';
+            coordsText.textContent = lat.toFixed(4) + '° N, ' + lng.toFixed(4) + '° E';
+            
+            // Embed free Google Maps iframe for that location
+            mapIframe.src = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+            mapFrame.style.display = 'block';
+          },
+          (error) => {
+            console.warn("GPS failed, using fallback coordinates.", error);
+            geoStatus.style.display = 'none';
+            geoSuccess.style.display = 'block';
+            
+            // Realistic fallback location (Navi Mumbai) if user blocks location or uses generic localhost
+            const demoLat = 19.0330;
+            const demoLng = 73.0297;
+            coordsText.textContent = demoLat + '° N, ' + demoLng + '° E (Demo Fallback)';
+            
+            mapIframe.src = `https://maps.google.com/maps?q=${demoLat},${demoLng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+            mapFrame.style.display = 'block';
+          }
+        );
+      } else {
+        geoStatus.textContent = "Geolocation is not supported by this browser.";
+      }
+    }
+  </script>
+</body>
+</html>

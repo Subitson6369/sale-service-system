@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Dashboard - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <i class="fas fa-store"></i> Sales & Service
+    </a>
+    <div class="navbar-links">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="products.html"><i class="fas fa-box"></i> Products</a>
+      <a href="service.html"><i class="fas fa-tools"></i> Services</a>
+      <a href="invoices.html"><i class="fas fa-file-invoice"></i> Invoices</a>
+      <button class="theme-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+      </button>
+      <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2 class="mb-3"><i class="fas fa-user-circle"></i> Welcome, Customer!</h2>
+
+    <!-- Quick Actions -->
+    <div class="stats-grid">
+      <div class="card stat-card" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+        <a href="products.html" style="color: white; text-decoration: none;">
+          <h3><i class="fas fa-shopping-cart"></i> Shop Products</h3>
+          <div class="number">→</div>
+        </a>
+      </div>
+      <div class="card stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <a href="service.html" style="color: white; text-decoration: none;">
+          <h3><i class="fas fa-tools"></i> Request Service</h3>
+          <div class="number">→</div>
+        </a>
+      </div>
+      <div class="card stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+        <a href="invoices.html" style="color: white; text-decoration: none;">
+          <h3><i class="fas fa-file-invoice"></i> View Invoices</h3>
+          <div class="number">→</div>
+        </a>
+      </div>
+      <div class="card stat-card" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+        <a href="service.html?tab=track" style="color: white; text-decoration: none;">
+          <h3><i class="fas fa-search"></i> Track Services</h3>
+          <div class="number">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Buy Product - Payment UI -->
+    <div class="card slide-up mb-3">
+      <h3><i class="fas fa-shopping-cart"></i> Buy Product</h3>
+      <div class="form-group">
+        <input type="text" id="customerName" placeholder="Your Name" required>
+      </div>
+      <div class="form-group">
+        <select id="paymentMethod">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Card">Card</option>
+        </select>
+      </div>
+      <button onclick="placeOrder()" class="btn btn-primary">
+        <i class="fas fa-shopping-cart"></i> Place Order
+      </button>
+    </div>
+
+    <!-- Service Request Form -->
+    <div class="card slide-up mb-3">
+      <h2><i class="fas fa-tools"></i> Submit Service Request</h2>
+      <form onsubmit="submitServiceRequest(event)">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Your Name</label>
+          <input type="text" id="serviceName" required placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="serviceEmail" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Phone</label>
+          <input type="tel" id="servicePhone" required placeholder="Enter your phone number">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-wrench"></i> Service Type</label>
+          <select id="serviceType" required>
+            <option value="">Select service type</option>
+            <option value="Computer Repair">Computer Repair</option>
+            <option value="Printer Repair">Printer Repair</option>
+            <option value="CCTV Installation">CCTV Installation</option>
+            <option value="Software Installation">Software Installation</option>
+            <option value="AMC (Annual Maintenance)">AMC (Annual Maintenance)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-align-left"></i> Description</label>
+          <textarea id="serviceDescription" rows="3" required placeholder="Describe your issue"></textarea>
+        </div>
+        <div id="serviceError" class="alert alert-error hidden"></div>
+        <div id="serviceSuccess" class="alert alert-success hidden"></div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      </form>
+    </div>
+
+    <!-- My Service Requests -->
+    <div class="card slide-up">
+      <h2><i class="fas fa-list"></i> My Service Requests</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Service Type</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="serviceTableBody">
+            <tr><td colspan="5" class="text-center"><div class="loading"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      
+      if (!token) {
+        window.location.href = 'login.html';
+        return false;
+      }
+      
+      if (role === 'admin') {
+        window.location.href = 'admin.html';
+        return false;
+      }
+      
+      return true;
+    }
+
+    async function submitServiceRequest(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('serviceName').value;
+      const email = document.getElementById('serviceEmail').value;
+      const phone = document.getElementById('servicePhone').value;
+      const serviceType = document.getElementById('serviceType').value;
+      const description = document.getElementById('serviceDescription').value;
+      const errorDiv = document.getElementById('serviceError');
+      const successDiv = document.getElementById('serviceSuccess');
+
+      try {
+        const response = await fetch('http://localhost:5000/api/services/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, serviceType, description })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successDiv.textContent = 'Service request submitted successfully!';
+          successDiv.classList.remove('hidden');
+          errorDiv.classList.add('hidden');
+          
+          // Clear form
+          event.target.reset();
+          
+          // Reload services
+          loadMyServices();
+        } else {
+          errorDiv.textContent = data.message;
+          errorDiv.classList.remove('hidden');
+          successDiv.classList.add('hidden');
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Failed to submit request. Please try again.';
+        errorDiv.classList.remove('hidden');
+      }
+    }
+
+    async function loadMyServices() {
+      const tbody = document.getElementById('serviceTableBody');
+      const userEmail = localStorage.getItem('userEmail');
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/services');
+        const services = await response.json();
+        
+        // Filter services for current user by email
+        const myServices = services.filter(s => s.email === userEmail);
+        
+        if (myServices.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center">No service requests found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = myServices.map(service => `
+          <tr>
+            <td>${service._id.substring(0, 8)}...</td>
+            <td>${service.serviceType}</td>
+            <td>${service.description.substring(0, 50)}...</td>
+            <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
+            <td>${new Date(service.createdAt).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading services</td></tr>';
+      }
+    }
+
+    if (checkAuth()) {
+      loadMyServices();
+    }
+  </script>
+</body>
+</html>

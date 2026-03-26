@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart & Payment – Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ── Navbar ───────────────────────────────────────────────────── */
+    .navbar{background:#1e1b4b;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-md);position:sticky;top:0;z-index:50;}
+    .navbar-brand{font-size:1.5rem;font-weight:700;color:white;display:flex;align-items:center;gap:.75rem;}
+    .navbar-brand img{height:36px;}
+    .navbar-menu{display:flex;gap:1.5rem;align-items:center;}
+    .navbar-menu a{color:rgba(255,255,255,.85);font-weight:500;text-decoration:none;}
+    .navbar-menu a:hover,.navbar-menu a.active{color:white;}
+
+    /* ── Progress bar ─────────────────────────────────────────────── */
+    .progress-bar{display:flex;justify-content:center;align-items:center;gap:0;padding:1.5rem 2rem;background:white;border-bottom:1px solid var(--border-color);}
+    .step{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:#94a3b8;position:relative;min-width:90px;}
+    .step-circle{width:34px;height:34px;border-radius:50%;border:2px solid #cbd5e1;background:white;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;transition:all .3s;}
+    .step.done .step-circle{background:#4f46e5;border-color:#4f46e5;color:white;}
+    .step.active .step-circle{background:#4f46e5;border-color:#4f46e5;color:white;box-shadow:0 0 0 4px rgba(79,70,229,.2);}
+    .step.done .step-label,.step.active .step-label{color:#1e1b4b;}
+    .step-connector{flex:1;height:2px;background:#cbd5e1;max-width:60px;}
+    .step-connector.done{background:#4f46e5;}
+
+    /* ── Layout ───────────────────────────────────────────────────── */
+    .page-wrap{max-width:1100px;margin:0 auto;padding:2rem;}
+    .two-col{display:grid;grid-template-columns:1fr 340px;gap:2rem;}
+    @media(max-width:860px){.two-col{grid-template-columns:1fr;}}
+    .card-box{background:var(--card-bg);border-radius:var(--border-radius);border:1px solid var(--border-color);padding:1.5rem;margin-bottom:1.5rem;}
+
+    /* ── Cart item ────────────────────────────────────────────────── */
+    .cart-item{display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--card-bg);border-radius:var(--border-radius);border:1px solid var(--border-color);margin-bottom:.75rem;}
+    .cart-thumb{width:68px;height:68px;border-radius:8px;overflow:hidden;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--text-muted);flex-shrink:0;}
+    .cart-thumb img{width:100%;height:100%;object-fit:cover;}
+    .qty-ctrl{display:flex;align-items:center;gap:.4rem;}
+    .qty-btn{width:28px;height:28px;border:1px solid var(--border-color);background:var(--bg-secondary);border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .qty-btn:hover{background:#4f46e5;color:white;border-color:#4f46e5;}
+    .rm-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem;padding:4px;}
+
+    /* ── Summary ──────────────────────────────────────────────────── */
+    .summary-sticky{position:sticky;top:90px;height:fit-content;}
+    .sum-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.93rem;}
+    .sum-row.total{font-weight:800;font-size:1.05rem;border-top:2px solid var(--border-color);padding-top:10px;margin-top:6px;color:#4f46e5;}
+
+    /* ── Payment method cards ─────────────────────────────────────── */
+    .pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0;}
+    @media(max-width:600px){.pay-grid{grid-template-columns:1fr;}}
+    .pay-card{border:2px solid var(--border-color);border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;transition:all .2s;background:white;}
+    .pay-card:hover{border-color:#4f46e5;background:#f5f3ff;}
+    .pay-card.selected{border-color:#4f46e5;background:#ede9fe;box-shadow:0 0 0 3px rgba(79,70,229,.15);}
+    .pay-card i{font-size:2rem;display:block;margin-bottom:.5rem;}
+    .pay-card span{font-weight:700;font-size:.9rem;}
+
+    /* ── QR box ───────────────────────────────────────────────────── */
+    .qr-box{text-align:center;padding:2rem;background:white;border-radius:12px;border:1px solid var(--border-color);}
+    .qr-img{width:180px;height:180px;margin:0 auto 1rem;border:4px solid #4f46e5;border-radius:12px;padding:4px;background:white;display:flex;align-items:center;justify-content:center;}
+    .upi-id-chip{display:inline-block;background:#f5f3ff;color:#4f46e5;font-weight:700;padding:.4rem 1rem;border-radius:20px;font-size:.95rem;border:1px solid #c4b5fd;margin:.5rem 0;}
+    .copy-btn{background:none;border:none;color:#4f46e5;cursor:pointer;font-size:.85rem;font-weight:600;margin-left:6px;}
+
+    /* ── Card payment form ────────────────────────────────────────── */
+    .razorpay-popup{background:#fff;border-radius:16px;border:1px solid var(--border-color);padding:2rem;max-width:440px;margin:0 auto;box-shadow:var(--shadow-lg);}
+    .rzp-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-color);}
+    .rzp-logo{width:36px;height:36px;border-radius:8px;background:#072654;display:flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;}
+    .card-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+
+    /* ── Cash confirm ─────────────────────────────────────────────── */
+    .cash-box{text-align:center;padding:2.5rem;background:white;border-radius:12px;border:2px dashed var(--border-color);}
+    .cash-icon{font-size:4rem;color:#22c55e;margin-bottom:1rem;}
+
+    /* ── Status badges ────────────────────────────────────────────── */
+    .status-chip{display:inline-flex;align-items:center;gap:6px;padding:.35rem .9rem;border-radius:20px;font-size:.8rem;font-weight:700;}
+    .status-pending{background:#fef3c7;color:#92400e;}
+    .status-paid{background:#dcfce7;color:#166534;}
+
+    /* ── Invoice print ────────────────────────────────────────────── */
+    .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:3px solid #1e1b4b;}
+    .inv-logo{font-size:1.4rem;font-weight:800;color:#1e1b4b;}
+    .inv-logo span{color:#4f46e5;}
+    .inv-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem;}
+    .inv-table th{background:#1e1b4b;color:white;padding:10px 12px;text-align:left;}
+    .inv-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;}
+    .inv-totals{margin-left:auto;width:280px;border-collapse:collapse;font-size:.9rem;}
+    .inv-totals td{padding:6px 10px;}
+    .inv-grand{background:#ede9fe;font-weight:800;font-size:1.05rem;}
+    .paid-stamp{display:inline-flex;align-items:center;gap:6px;color:#16a34a;border:2px solid #16a34a;border-radius:8px;padding:6px 16px;font-weight:800;}
+    @media print{body>*{display:none!important;}#invoiceSection{display:block!important;}}
+
+    /* ── Empty cart ───────────────────────────────────────────────── */
+    .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-muted);}
+    .empty-state i{font-size:4rem;opacity:.25;display:block;margin-bottom:1rem;}
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="customer-dashboard.html" class="navbar-brand">
+      <img src="images/logo.png" alt="Third Eye Technologies">
+    </a>
+    <div class="navbar-menu">
+      <a href="customer-dashboard.html">Dashboard</a>
+      <a href="products.html">Products</a>
+      <a href="services.html">Services</a>
+      <a href="billing.html">Invoices</a>
+      <a href="cart.html" class="active"><i class="fa-solid fa-cart-shopping"></i> Cart <span id="cartCount">(0)</span></a>
+      <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+  </nav>
+
+  <!-- Progress Steps -->
+  <div class="progress-bar" id="progressBar">
+    <div class="step active" id="step1"><div class="step-circle"><i class="fa-solid fa-cart-shopping"></i></div><div class="step-label">Cart</div></div>
+    <div class="step-connector" id="conn1"></div>
+    <div class="step" id="step2"><div class="step-circle"><i class="fa-solid fa-user"></i></div><div class="step-label">Details</div></div>
+    <div class="step-connector" id="conn2"></div>
+    <div class="step" id="step3"><div class="step-circle"><i class="fa-solid fa-credit-card"></i></div><div class="step-label">Payment</div></div>
+    <div class="step-connector" id="conn3"></div>
+    <div class="step" id="step4"><div class="step-circle"><i class="fa-solid fa-check"></i></div><div class="step-label">Confirmed</div></div>
+    <div class="step-connector" id="conn4"></div>
+    <div class="step" id="step5"><div class="step-circle"><i class="fa-solid fa-file-invoice"></i></div><div class="step-label">Invoice</div></div>
+  </div>
+
+  <!-- ═══════════════ STATE 1: CART ═══════════════ -->
+  <div id="stateCart" class="page-wrap">
+    <h1 class="page-title" style="margin-bottom:.25rem;"><i class="fa-solid fa-cart-shopping" style="color:#4f46e5;margin-right:10px;"></i>My Cart</h1>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">Review your items before checkout.</p>
+    <div class="two-col">
+      <div>
+        <div id="cartItems"></div>
+        <a href="products.html" style="color:#4f46e5;font-weight:600;display:inline-flex;align-items:center;gap:6px;margin-top:.5rem;">
+          <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+        </a>
+      </div>
+      <div class="summary-sticky">
+        <div class="card-box">
+          <h3 style="margin-bottom:1rem;">Order Summary</h3>
+          <div id="sumItems"></div>
+          <div class="sum-row"><span>GST (18%)</span><span id="sumGst">₹0</span></div>
+          <div class="sum-row total"><span>Total Payable</span><span id="sumTotal">₹0</span></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:1rem;" onclick="goToCheckout()">
+            <i class="fa-solid fa-arrow-right"></i> Proceed to Checkout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STATE 2: CHECKOUT ═══════════════ -->
+  <div id="stateCheckout" style="display:none;" class="page-wrap" style="max-width:680px;">
+    <div style="max-width:680px;margin:0 auto;">
+      <button class="btn" style="border:1px solid var(--border-color);background:white;margin-bottom:1rem;" onclick="goToState('cart')">
+        <i class="fa-solid fa-arrow-left"></i> Back to Cart
+      </button>
+      <div class="card-box">
+        <h2 style="margin-bottom:1.5rem;"><i class="fa-solid fa-user-check" style="color:#4f46e5;margin-right:8px;"></i>Your Details</h2>
+        <form onsubmit="goToPayment(event)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group"><label>Full Name *</label><input type="text" id="custName" class="form-control" required placeholder="Ramesh Kumar"></div>
+            <div class="form-group"><label>Phone *</label><input type="tel" id="custPhone" class="form-control" required placeholder="+91 9876543210"></div>
+          </div>
+          <div class="form-group"><label>Email</label><input type="email" id="custEmail" class="form-control" placeholder="you@email.com"></div>
+          <div class="form-group"><label>Delivery Address *</label><textarea id="custAddress" class="form-control" rows="2" required placeholder="Door No, Street, City, PIN"></textarea></div>
+
+          <!-- Mini summary -->
+          <div style="background:var(--bg-secondary);border-radius:8px;padding:1rem;margin:1rem 0;">
+            <div class="sum-row"><span>Subtotal</span><span id="co-sub">₹0</span></div>
+            <div class="sum-row"><span>GST (18%)</span><span id="co-gst">₹0</span></div>
+            <div class="sum-row total"><span>Total Payable</span><span id="co-tot">₹0</span></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;font-size:1rem;">
+            <i class="fa-solid fa-arrow-right"></i> Continue to Payment
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STATE 3: PAYMENT PENDING ═══════════════ -->
+  <div id="statePayment" style="display:none;" class="page-wrap">
+    <div style="max-width:620px;margin:0 auto;">
+      <button class="btn" style="border:1px solid var(--border-color);background:white;margin-bottom:1rem;" onclick="goToState('checkout')">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </button>
+
+      <div class="card-box" style="margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:600;">Amount Due</span>
+          <span style="font-size:1.4rem;font-weight:800;color:#4f46e5;" id="payAmount">₹0</span>
+        </div>
+        <div style="margin-top:4px;color:var(--text-muted);font-size:.85rem;" id="payName"></div>
+        <div class="status-chip status-pending" style="margin-top:8px;"><i class="fa-solid fa-clock"></i> Payment Pending</div>
+      </div>
+
+      <div class="card-box">
+        <h3 style="margin-bottom:1rem;">Choose Payment Method</h3>
+        <div class="pay-grid">
+          <div class="pay-card selected" id="pm-upi" onclick="selectMethod('upi')">
+            <i class="fa-solid fa-mobile-screen-button" style="color:#4f46e5;"></i>
+            <span>UPI / QR</span>
+          </div>
+          <div class="pay-card" id="pm-card" onclick="selectMethod('card')">
+            <i class="fa-solid fa-credit-card" style="color:#0ea5e9;"></i>
+            <span>Card</span>
+          </div>
+          <div class="pay-card" id="pm-cash" onclick="selectMethod('cash')">
+            <i class="fa-solid fa-money-bill-wave" style="color:#22c55e;"></i>
+            <span>Cash</span>
+          </div>
+        </div>
+
+        <!-- UPI Panel -->
+        <div id="panelUpi" style="margin-top:1rem;">
+          <div class="qr-box">
+            <p style="font-weight:700;margin-bottom:1rem;color:#4f46e5;">Scan QR to Pay</p>
+            <div class="qr-img">
+              <!-- QR code generated via free Google Charts API -->
+              <img id="qrImg" src="" alt="UPI QR" style="width:100%;height:100%;border-radius:8px;">
+            </div>
+            <div>
+              <span style="color:var(--text-muted);font-size:.85rem;">UPI ID:</span>
+              <span class="upi-id-chip" id="upiIdDisplay">thirdeye@upi</span>
+              <button class="copy-btn" onclick="copyUPI()"><i class="fa-solid fa-copy"></i> Copy</button>
+            </div>
+            <p style="color:var(--text-muted);font-size:.83rem;margin-top:.75rem;">Open any UPI app (PhonePe, GPay, Paytm) → Scan QR or use UPI ID → Pay the amount shown above.</p>
+            <button class="btn btn-primary" style="width:100%;margin-top:1rem;" onclick="confirmUpiPaid()">
+              <i class="fa-solid fa-check-circle"></i> I Have Paid via UPI
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Panel (Razorpay-style UI) -->
+        <div id="panelCard" style="margin-top:1rem;display:none;">
+          <div class="razorpay-popup">
+            <div class="rzp-header">
+              <div class="rzp-logo"><i class="fa-solid fa-bolt"></i></div>
+              <div>
+                <div style="font-weight:700;">Third Eye Technologies</div>
+                <div style="font-size:.82rem;color:var(--text-muted);">Secure Card Payment</div>
+              </div>
+              <div style="margin-left:auto;font-size:1.1rem;font-weight:800;color:#4f46e5;" id="rzpAmt">₹0</div>
+            </div>
+            <div class="form-group">
+              <label>Card Number</label>
+              <input type="text" id="rzpCard" class="form-control" placeholder="4111 1111 1111 1111" maxlength="19" oninput="formatCard(this)">
+            </div>
+            <div class="card-row">
+              <div class="form-group"><label>Expiry (MM/YY)</label><input type="text" id="rzpExpiry" class="form-control" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)"></div>
+              <div class="form-group"><label>CVV</label><input type="password" id="rzpCvv" class="form-control" placeholder="•••" maxlength="3"></div>
+            </div>
+            <div class="form-group"><label>Cardholder Name</label><input type="text" id="rzpHolder" class="form-control" placeholder="Name on card"></div>
+            <button class="btn btn-primary" style="width:100%;background:#072654;" onclick="confirmCardPaid()">
+              <i class="fa-solid fa-lock"></i> Pay Securely
+            </button>
+            <div style="text-align:center;margin-top:.75rem;font-size:.78rem;color:var(--text-muted);">
+              <i class="fa-solid fa-shield-halved"></i> 256-bit SSL Encrypted · Secured by Razorpay
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash Panel - STEP 1: Place Order -->
+        <div id="panelCash" style="margin-top:1rem;display:none;">
+          <div class="cash-box" id="cashStep1">
+            <div class="cash-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <h3 style="margin-bottom:.5rem;">Pay at Doorstep</h3>
+            <p style="color:var(--text-muted);margin-bottom:1rem;">Keep <strong id="cashAmt">₹0</strong> ready when our delivery team arrives.</p>
+            <div style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:.75rem;margin-bottom:1.5rem;font-size:.85rem;color:#713f12;text-align:left;">
+              <i class="fa-solid fa-triangle-exclamation"></i> <strong>Invoice is only generated after cash payment is verified by the delivery agent.</strong>
+            </div>
+            <button class="btn btn-primary" style="background:#16a34a;width:100%;" onclick="placeCashOrder()">
+              <i class="fa-solid fa-check"></i> Confirm — Place Cash Order
+            </button>
+          </div>
+
+          <!-- STEP 2: Cash Verification Gate (shown after order is placed) -->
+          <div id="cashStep2" style="display:none;">
+            <div style="text-align:center;padding:1.5rem;background:#f0fdf4;border-radius:12px;border:2px solid #86efac;margin-bottom:1rem;">
+              <i class="fa-solid fa-circle-check" style="font-size:2.5rem;color:#16a34a;display:block;margin-bottom:.75rem;"></i>
+              <h3 style="color:#166534;margin-bottom:.25rem;">Order Placed!</h3>
+              <p style="color:#166534;font-size:.9rem;">Your delivery is on the way. Pay cash to the delivery agent.</p>
+            </div>
+
+            <div style="background:white;border-radius:12px;border:1px solid var(--border-color);padding:1.5rem;text-align:center;">
+              <div style="font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:.5rem;">Cash Verification Code</div>
+              <div id="cashOtpDisplay" style="font-size:2.5rem;font-weight:900;letter-spacing:12px;color:#1e1b4b;font-family:monospace;padding:.75rem;background:#f8fafc;border-radius:8px;border:2px dashed #cbd5e1;margin-bottom:.5rem;">----</div>
+              <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1.5rem;">Share this code with the delivery agent or ask them for this code to confirm payment has been received.</p>
+
+              <label style="font-weight:700;display:block;margin-bottom:.5rem;text-align:left;">Enter Verification Code to Confirm Payment:</label>
+              <div style="display:flex;gap:.75rem;">
+                <input type="text" id="cashVerifyInput" class="form-control" placeholder="Enter 4-digit code" maxlength="4" style="letter-spacing:6px;font-size:1.2rem;font-weight:700;text-align:center;">
+                <button class="btn btn-primary" style="white-space:nowrap;background:#16a34a;" onclick="verifyCashCode()">
+                  <i class="fa-solid fa-lock-open"></i> Verify & Generate Invoice
+                </button>
+              </div>
+              <p id="cashVerifyError" style="color:#ef4444;font-size:.85rem;margin-top:.5rem;display:none;"><i class="fa-solid fa-circle-xmark"></i> Incorrect code. Please try again.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STATE 4: PAYMENT CONFIRMED ═══════════════ -->
+  <div id="stateConfirmed" style="display:none;" class="page-wrap">
+    <div style="max-width:500px;margin:0 auto;text-align:center;padding:3rem 1rem;">
+      <div style="width:90px;height:90px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem;color:#16a34a;">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h2 style="margin-bottom:.5rem;">Payment Confirmed!</h2>
+      <p style="color:var(--text-muted);margin-bottom:.5rem;" id="confirmedMsg">Your payment has been received.</p>
+      <div class="status-chip status-paid" style="margin:0 auto .75rem;display:inline-flex;"><i class="fa-solid fa-check"></i> <span id="confirmedMethod">UPI</span> – PAID</div>
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:2rem;">Generating your invoice...</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#4f46e5;">
+        <i class="fa-solid fa-spinner fa-spin"></i> <span>Processing...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ STATE 5: INVOICE ═══════════════ -->
+  <div id="stateInvoice" style="display:none;" class="page-wrap">
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Invoice</button>
+      <button class="btn" style="border:1px solid var(--border-color);background:white;" onclick="downloadPdf()"><i class="fa-solid fa-download"></i> Download PDF</button>
+      <a href="products.html" class="btn" style="border:1px solid var(--border-color);background:white;"><i class="fa-solid fa-store"></i> Continue Shopping</a>
+    </div>
+
+    <div id="invoicePrintArea" style="background:white;border-radius:12px;border:1px solid var(--border-color);padding:2.5rem;box-shadow:var(--shadow-md);">
+      <div class="inv-header">
+        <div>
+          <div class="inv-logo">Third <span>Eye</span> Technologies</div>
+          <div style="font-size:.82rem;color:#64748b;margin-top:4px;">No. 12, Tech Park, Chennai – 600001</div>
+          <div style="font-size:.82rem;color:#64748b;">Phone: +91 98765 43210 &nbsp;|&nbsp; GST: 33ABCDE1234F1Z5</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.4rem;font-weight:800;color:#4f46e5;">TAX INVOICE</div>
+          <div style="font-size:.82rem;color:#64748b;">Invoice No: <strong id="invNo">—</strong></div>
+          <div style="font-size:.82rem;color:#64748b;">Date: <strong id="invDate">—</strong></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:1.5rem;">
+        <div>
+          <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;">Bill To</div>
+          <div style="font-weight:700;" id="invCust">—</div>
+          <div style="font-size:.83rem;color:#64748b;" id="invPhone">—</div>
+          <div style="font-size:.83rem;color:#64748b;" id="invEmail">—</div>
+          <div style="font-size:.83rem;color:#64748b;margin-top:4px;" id="invAddr">—</div>
+        </div>
+        <div>
+          <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;">Payment</div>
+          <div style="font-weight:700;" id="invMethod">—</div>
+          <div style="margin-top:8px;"><div class="paid-stamp"><i class="fa-solid fa-check-circle"></i> PAYMENT RECEIVED</div></div>
+        </div>
+      </div>
+
+      <table class="inv-table">
+        <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Unit Price</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody id="invItems"></tbody>
+      </table>
+
+      <table class="inv-totals">
+        <tr><td>Subtotal</td><td style="text-align:right;font-weight:600;" id="invSub">₹0</td></tr>
+        <tr><td>GST (18%)</td><td style="text-align:right;font-weight:600;" id="invGst">₹0</td></tr>
+        <tr class="inv-grand"><td style="padding:8px 10px;">Total Paid</td><td style="text-align:right;padding:8px 10px;" id="invTotal">₹0</td></tr>
+      </table>
+
+      <div style="margin-top:2.5rem;padding-top:1rem;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+        <div style="font-size:.8rem;color:#94a3b8;">Thank you for shopping with Third Eye Technologies!</div>
+        <div style="font-size:.8rem;color:#94a3b8;">This is a computer-generated invoice and does not require a signature.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // ── State management ───────────────────────────────────────────
+    let currentState = 'cart';
+    let selectedMethod = 'upi';
+    let orderPayload = {};      // customer details
+    let orderResults  = [];     // filled after backend call
+    const UPI_ID = 'thirdeye@upi';
+
+    const STATES = ['cart','checkout','payment','confirmed','invoice'];
+
+    function goToState(state) {
+      STATES.forEach(s => {
+        const el = document.getElementById('state' + capitalize(s));
+        if (el) el.style.display = (s === state) ? '' : 'none';
+      });
+      currentState = state;
+      updateProgress(state);
+      window.scrollTo(0,0);
+    }
+
+    function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function updateProgress(state) {
+      const order = ['cart','checkout','payment','confirmed','invoice'];
+      const idx   = order.indexOf(state);
+      order.forEach((s, i) => {
+        const stepEl = document.getElementById('step' + (i+1));
+        const connEl = document.getElementById('conn' + (i+1));
+        if (!stepEl) return;
+        stepEl.className = 'step' + (i < idx ? ' done' : i === idx ? ' active' : '');
+        if (connEl) connEl.className = 'step-connector' + (i < idx ? ' done' : '');
+      });
+    }
+
+    // ── Cart functions ─────────────────────────────────────────────
+    function getCart()      { return JSON.parse(localStorage.getItem('cart') || '[]'); }
+    function saveCart(c)    { localStorage.setItem('cart', JSON.stringify(c)); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCart();
+      goToState('cart');
+    });
+
+    function renderCart() {
+      const cart = getCart();
+      document.getElementById('cartCount').textContent = '(' + cart.reduce((s,i) => s+i.qty, 0) + ')';
+      const itemsEl = document.getElementById('cartItems');
+      const sumEl   = document.getElementById('sumItems');
+
+      if (!cart.length) {
+        itemsEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-cart-shopping"></i><h3>Your cart is empty</h3><p>Add products to get started</p><a href="products.html" class="btn btn-primary" style="margin-top:1rem;">Browse Products</a></div>`;
+        ['sumGst','sumTotal'].forEach(id => document.getElementById(id).textContent = '₹0');
+        sumEl.innerHTML = '';
+        return;
+      }
+
+      let sub = 0;
+      itemsEl.innerHTML = '';
+      sumEl.innerHTML   = '';
+
+      cart.forEach((item, idx) => {
+        const line = item.price * item.qty;
+        sub += line;
+        itemsEl.innerHTML += `
+          <div class="cart-item">
+            <div class="cart-thumb">${item.image ? `<img src="/uploads/products/${item.image}" alt="${item.name}">` : `<i class="fa-solid fa-box-open"></i>`}</div>
+            <div style="flex:1">
+              <div style="font-weight:700;">${item.name}</div>
+              <div style="color:#4f46e5;font-weight:700;">₹${item.price.toLocaleString()}</div>
+            </div>
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+              <span style="min-width:24px;text-align:center;font-weight:600;">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+            </div>
+            <div style="min-width:80px;text-align:right;font-weight:700;">₹${line.toLocaleString()}</div>
+            <button class="rm-btn" onclick="removeItem(${idx})"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        sumEl.innerHTML += `<div class="sum-row"><span>${item.name} ×${item.qty}</span><span>₹${line.toLocaleString()}</span></div>`;
+      });
+
+      const gst   = Math.round(sub * .18);
+      const total = sub + gst;
+      document.getElementById('sumGst').textContent   = '₹' + gst.toLocaleString();
+      document.getElementById('sumTotal').textContent = '₹' + total.toLocaleString();
+    }
+
+    function changeQty(idx, d) {
+      let c = getCart(); c[idx].qty = Math.max(1, c[idx].qty + d); saveCart(c); renderCart();
+    }
+    function removeItem(idx) {
+      let c = getCart(); c.splice(idx,1); saveCart(c); renderCart();
+    }
+
+    // ── Checkout ───────────────────────────────────────────────────
+    function goToCheckout() {
+      if (!getCart().length) { alert('Your cart is empty!'); return; }
+      const sub = getCart().reduce((s,i) => s + i.price*i.qty, 0);
+      const gst = Math.round(sub*.18);
+      document.getElementById('co-sub').textContent = '₹' + sub.toLocaleString();
+      document.getElementById('co-gst').textContent = '₹' + gst.toLocaleString();
+      document.getElementById('co-tot').textContent = '₹' + (sub+gst).toLocaleString();
+      goToState('checkout');
+    }
+
+    function goToPayment(e) {
+      e.preventDefault();
+      orderPayload = {
+        name   : document.getElementById('custName').value,
+        phone  : document.getElementById('custPhone').value,
+        email  : document.getElementById('custEmail').value,
+        address: document.getElementById('custAddress').value
+      };
+      const sub   = getCart().reduce((s,i) => s + i.price*i.qty, 0);
+      const total = sub + Math.round(sub*.18);
+      document.getElementById('payAmount').textContent = '₹' + total.toLocaleString();
+      document.getElementById('payName').textContent   = 'For ' + orderPayload.name;
+      document.getElementById('cashAmt').textContent   = '₹' + total.toLocaleString();
+      document.getElementById('rzpAmt').textContent    = '₹' + total.toLocaleString();
+      // Generate QR with payment amount embedded in UPI link
+      const upiLink = `upi://pay?pa=${UPI_ID}&pn=ThirdEyeTech&am=${total}&cu=INR&tn=Order`;
+      document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiLink)}`;
+      document.getElementById('upiIdDisplay').textContent = UPI_ID;
+      selectMethod('upi');
+      goToState('payment');
+    }
+
+    // ── Payment method selection ───────────────────────────────────
+    function selectMethod(m) {
+      selectedMethod = m;
+      ['upi','card','cash'].forEach(id => {
+        document.getElementById('pm-' + id).classList.toggle('selected', id === m);
+        document.getElementById('panel' + capitalize(id)).style.display = id === m ? '' : 'none';
+      });
+    }
+
+    // ── UPI confirmation ───────────────────────────────────────────
+    function copyUPI() {
+      navigator.clipboard.writeText(UPI_ID).catch(() => {});
+      showToast('UPI ID copied!');
+    }
+
+    async function confirmUpiPaid() {
+      showConfirmed('UPI / QR', 'Your UPI payment of <strong>' + document.getElementById('payAmount').textContent + '</strong> has been verified.');
+      await placeOrderAndInvoice('UPI');
+    }
+
+    // ── Card payment ───────────────────────────────────────────────
+    function formatCard(el) {
+      let v = el.value.replace(/\D/g,'').slice(0,16);
+      el.value = v.match(/.{1,4}/g)?.join(' ') || v;
+    }
+    function formatExpiry(el) {
+      let v = el.value.replace(/\D/g,'').slice(0,4);
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      el.value = v;
+    }
+
+    async function confirmCardPaid() {
+      const card   = document.getElementById('rzpCard').value.replace(/\s/g,'');
+      const expiry = document.getElementById('rzpExpiry').value;
+      const cvv    = document.getElementById('rzpCvv').value;
+      const holder = document.getElementById('rzpHolder').value;
+
+      if (card.length < 16) { showToast('Please enter a valid 16-digit card number','#ef4444'); return; }
+      if (expiry.length < 5) { showToast('Please enter expiry as MM/YY','#ef4444'); return; }
+      if (cvv.length < 3)    { showToast('Please enter a valid 3-digit CVV','#ef4444'); return; }
+      if (!holder)           { showToast('Please enter cardholder name','#ef4444'); return; }
+
+      // Simulate Razorpay processing
+      const btn = event.currentTarget;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+      await new Promise(r => setTimeout(r, 1800)); // simulated delay
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay Securely';
+
+      showConfirmed('Card', 'Your card payment has been processed successfully.');
+      await placeOrderAndInvoice('Card');
+    }
+
+    // ── Cash: 2-phase flow ─────────────────────────────────────────
+    let cashVerificationCode = '';   // generated when order is placed
+    let cashOrderCart = [];          // snapshot of cart for invoice
+
+    async function placeCashOrder() {
+      cashOrderCart = getCart().slice(); // snapshot before clearing
+
+      // Generate a random 4-digit code
+      cashVerificationCode = String(Math.floor(1000 + Math.random() * 9000));
+
+      // Place orders in backend (with Cash Pending status)
+      for (const item of cashOrderCart) {
+        const payload = {
+          customerName  : orderPayload.name,
+          phone         : orderPayload.phone,
+          email         : orderPayload.email,
+          address       : orderPayload.address,
+          productId     : item._id,
+          quantity      : item.qty,
+          paymentMethod : 'Cash'
+        };
+        try {
+          const res  = await fetch('/api/orders/add', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok) orderResults.push({ item, invoice: data.invoice, order: data.order });
+        } catch(e) { console.error(e); }
+      }
+
+      localStorage.removeItem('cart');
+      renderCart();
+
+      // Show verification UI with the code
+      document.getElementById('cashOtpDisplay').textContent = cashVerificationCode;
+      document.getElementById('cashStep1').style.display = 'none';
+      document.getElementById('cashStep2').style.display = '';
+      document.getElementById('cashVerifyError').style.display = 'none';
+      document.getElementById('cashVerifyInput').value = '';
+    }
+
+    function verifyCashCode() {
+      const entered = document.getElementById('cashVerifyInput').value.trim();
+      if (entered !== cashVerificationCode) {
+        document.getElementById('cashVerifyError').style.display = 'block';
+        document.getElementById('cashVerifyInput').style.border = '2px solid #ef4444';
+        return;
+      }
+      // Code correct → mark orders Completed in DB, then show invoice
+      document.getElementById('cashVerifyError').style.display = 'none';
+      orderResults.forEach(r => {
+        if (r.order?._id) {
+          fetch('/api/orders/complete/' + r.order._id, {
+            method : 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({ paymentMethod: 'Cash' })
+          }).catch(e => console.warn('Cash complete error', e));
+        }
+      });
+      showConfirmed('Cash', 'Cash payment of <strong>' + document.getElementById('payAmount').textContent + '</strong> has been verified and received.');
+      renderInvoice('Cash');
+    }
+
+    // ── Core: place order → generate invoice ──────────────────────
+    async function placeOrderAndInvoice(payMethod) {
+      const cart = getCart();
+      orderResults = [];
+
+      for (const item of cart) {
+        const payload = {
+          customerName  : orderPayload.name,
+          phone         : orderPayload.phone,
+          email         : orderPayload.email,
+          address       : orderPayload.address,
+          productId     : item._id,
+          quantity      : item.qty,
+          paymentMethod : payMethod
+        };
+        try {
+          const res  = await fetch('/api/orders/add', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok) {
+            const savedOrder = data.order;
+            // For UPI / Card — mark order as Completed+Paid immediately
+            if (payMethod !== 'Cash' && savedOrder?._id) {
+              await fetch('/api/orders/complete/' + savedOrder._id, {
+                method : 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body   : JSON.stringify({ paymentMethod: payMethod })
+              }).catch(e => console.warn('Complete error', e));
+            }
+            orderResults.push({ item, invoice: data.invoice, order: savedOrder });
+          }
+        } catch (err) { console.error('Order error for', item.name, err); }
+      }
+
+      localStorage.removeItem('cart');
+      renderInvoice(payMethod);
+    }
+
+
+    // ── Show confirmed state ───────────────────────────────────────
+    function showConfirmed(method, msg) {
+      document.getElementById('confirmedMethod').textContent = method;
+      document.getElementById('confirmedMsg').innerHTML      = msg;
+      goToState('confirmed');
+    }
+
+    // ── Render invoice ─────────────────────────────────────────────
+    function renderInvoice(payMethod) {
+      // Brief delay so user sees the "Confirmed" state
+      setTimeout(() => {
+        const invNo = 'INV-' + Date.now().toString().slice(-8);
+        const now   = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+        document.getElementById('invNo').textContent    = invNo;
+        document.getElementById('invDate').textContent  = now;
+        document.getElementById('invCust').textContent  = orderPayload.name;
+        document.getElementById('invPhone').textContent = orderPayload.phone;
+        document.getElementById('invEmail').textContent = orderPayload.email || '—';
+        document.getElementById('invAddr').textContent  = orderPayload.address;
+        document.getElementById('invMethod').textContent = payMethod;
+
+        let sub = 0;
+        let tbody = '';
+        orderResults.forEach((r, i) => {
+          const line = r.item.price * r.item.qty;
+          sub += line;
+          tbody += `<tr><td>${i+1}</td><td>${r.item.name}</td><td>${r.item.qty}</td><td>₹${r.item.price.toLocaleString()}</td><td style="text-align:right;">₹${line.toLocaleString()}</td></tr>`;
+        });
+        document.getElementById('invItems').innerHTML = tbody;
+
+        const gst   = Math.round(sub * .18);
+        const total = sub + gst;
+        document.getElementById('invSub').textContent   = '₹' + sub.toLocaleString();
+        document.getElementById('invGst').textContent   = '₹' + gst.toLocaleString();
+        document.getElementById('invTotal').textContent = '₹' + total.toLocaleString();
+
+        goToState('invoice');
+      }, 2000);
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────
+    function showToast(msg, bg='#4f46e5') {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = `position:fixed;bottom:30px;right:30px;background:${bg};color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);`;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    function downloadPdf() {
+      const content = document.getElementById('invoicePrintArea').innerHTML;
+      const w = window.open('','_blank');
+      w.document.write(`<!DOCTYPE html><html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:2rem;max-width:800px;margin:0 auto;}table{width:100%;border-collapse:collapse;}th{background:#1e1b4b;color:white;padding:10px;text-align:left;}td{padding:10px;border-bottom:1px solid #e2e8f0;}.inv-grand td{background:#ede9fe;font-weight:800;}.paid-stamp{color:#16a34a;border:2px solid #16a34a;border-radius:8px;padding:6px 16px;font-weight:800;display:inline-block;}</style></head><body>${content}</body></html>`);
+      w.document.close();
+      w.print();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Dashboard - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .navbar {
+      background-color: #1e1b4b;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .navbar-brand i { color: var(--primary-color); }
+    .navbar-menu { display: flex; gap: 1.5rem; }
+    .navbar-menu a {
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+    .navbar-menu a:hover, .navbar-menu a.active {
+      color: white;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+      padding: 2rem;
+      text-align: center;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background-color: rgba(79, 70, 229, 0.1);
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  
+  <nav class="navbar">
+    <a href="customer-dashboard.html" class="navbar-brand">
+      <img src="images/logo.png" alt="Third Eye Technologies" class="shop-logo">
+    </a>
+    <div class="navbar-menu">
+      <a href="products.html">Products</a>
+      <a href="services.html">Services</a>
+      <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+  </nav>
+
+  <main style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <div>
+        <h1 class="page-title" style="margin-bottom: 0.5rem;">Welcome, Customer!</h1>
+        <p style="color: var(--text-muted);">Manage your purchases, services, and invoices from one place.</p>
+      </div>
+    </div>
+
+    <div class="features-grid">
+      <!-- Browse Products -->
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-laptop"></i></div>
+        <h3>Shop Products</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; flex-grow: 1;">Browse our latest collection of laptops, desktops, and printers.</p>
+        <a href="products.html" class="btn btn-primary">View Products</a>
+      </div>
+
+      <!-- Service Request -->
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <h3>Service Request</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; flex-grow: 1;">Facing issues? Submit a new service request for your devices.</p>
+        <a href="services.html" class="btn btn-primary">Request Service</a>
+      </div>
+
+      <!-- Track Service -->
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+        <h3>Track Service</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; flex-grow: 1;">Check the real-time status of your ongoing service requests.</p>
+        <a href="services.html" class="btn btn-primary" style="background-color: white; color: var(--primary-color); border: 1px solid var(--primary-color);">Status Tracker</a>
+      </div>
+
+      <!-- Invoices -->
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-file-invoice"></i></div>
+        <h3>My Invoices</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; flex-grow: 1;">View and download invoices for your previous purchases.</p>
+        <a href="billing.html" class="btn btn-primary" style="background-color: white; color: var(--primary-color); border: 1px solid var(--primary-color);">Download Invoice</a>
+      </div>
+    </div>
+  </main>
+  <script src="js/app.js"></script>
+</body>
+</html>

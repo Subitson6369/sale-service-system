@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assign Service - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .badge-pending   { background:#fef3c7;color:#92400e; }
+    .badge-assigned  { background:#dbeafe;color:#1e40af; }
+    .badge-progress  { background:#fce7f3;color:#9d174d; }
+    .badge-completed { background:#dcfce7;color:#166534; }
+    .priority-high      { color:#f59e0b;font-weight:700; }
+    .priority-emergency { color:#ef4444;font-weight:700; }
+    .priority-normal    { color:#64748b; }
+    .eng-opt { display:flex;flex-direction:column; }
+
+    /* Filter tabs */
+    .filter-tabs { display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap; }
+    .filter-tab  { padding:.4rem 1rem;border-radius:20px;border:1px solid var(--border-color);background:white;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s; }
+    .filter-tab.active { background:#4f46e5;color:white;border-color:#4f46e5; }
+  </style>
+</head>
+<body class="role-admin">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-desktop" style="margin-right:10px;"></i> Admin Panel</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="admin-dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+        <a href="products.html"        class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="services.html"        class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Services</a>
+        <a href="engineers.html"       class="nav-item"><i class="fa-solid fa-user-gear"></i> Service Engineers</a>
+        <a href="assign-service.html"  class="nav-item active"><i class="fa-solid fa-clipboard-list"></i> Assign Service</a>
+        <a href="billing.html"         class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Billing</a>
+        <a href="payments.html"        class="nav-item"><i class="fa-solid fa-credit-card"></i> Payments</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding:0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y:auto;">
+      <header class="header admin-only">
+        <div class="header-title">Third Eye Technologies</div>
+        <div class="header-user">
+          <span style="font-weight:500;">Admin User</span>
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+          <h1 class="page-title" style="margin:0;">Assign Doorstep Services</h1>
+          <button class="btn" style="border:1px solid var(--border-color);background:white;" onclick="loadAll()">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterRequests('all',this)">All</button>
+          <button class="filter-tab" onclick="filterRequests('Pending',this)">🟡 Pending</button>
+          <button class="filter-tab" onclick="filterRequests('Assigned',this)">🔵 Assigned</button>
+          <button class="filter-tab" onclick="filterRequests('In Progress',this)">🟣 In Progress</button>
+          <button class="filter-tab" onclick="filterRequests('Completed',this)">🟢 Completed</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Customer Service Requests</h3>
+            <span id="reqCount" style="font-size:.85rem;color:var(--text-muted);"></span>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Req ID</th>
+                  <th>Customer</th>
+                  <th>Location</th>
+                  <th>Service Type</th>
+                  <th>Pref. Date</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Assigned To</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="serviceBody">
+                <tr><td colspan="9" style="text-align:center;padding:2.5rem;color:var(--text-muted);">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Loading service requests...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Assign Engineer Modal -->
+  <div class="modal" id="assignModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size:1.25rem;"><i class="fa-solid fa-user-gear" style="color:#4f46e5;margin-right:8px;"></i>Assign Service Engineer</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+
+      <div style="background:var(--bg-secondary);border-radius:8px;padding:1rem;margin-bottom:1.25rem;font-size:.9rem;" id="modalServiceInfo">
+        <!-- filled by JS -->
+      </div>
+
+      <form onsubmit="submitAssignment(event)">
+        <input type="hidden" id="assignServiceId">
+        <div class="form-group">
+          <label>Select Engineer <span style="color:#ef4444;">*</span></label>
+          <select id="assignEngineerId" class="form-control" required>
+            <option value="" disabled selected>Loading engineers...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="assignPriority" class="form-control">
+            <option value="Normal">Normal</option>
+            <option value="High">High Priority</option>
+            <option value="Emergency">🚨 Emergency</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;" id="assignSubmitBtn">
+          <i class="fa-solid fa-paper-plane"></i> Assign &amp; Dispatch Engineer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Status Update Modal -->
+  <div class="modal" id="statusModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size:1.25rem;"><i class="fa-solid fa-pen-to-square" style="color:#4f46e5;margin-right:8px;"></i>Update Service Status</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="submitStatusUpdate(event)">
+        <input type="hidden" id="statusServiceId">
+        <div class="form-group">
+          <label>New Status</label>
+          <select id="newStatus" class="form-control" required>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">
+          <i class="fa-solid fa-floppy-disk"></i> Update Status
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Location Map Modal -->
+  <div class="modal" id="mapModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size:1.25rem;"><i class="fa-solid fa-map-location-dot" style="color:#ef4444;margin-right:8px;"></i>Customer Location</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div id="mapInfo" style="padding:.5rem 0 1rem;"></div>
+      <div id="mapFrame" style="border-radius:10px;overflow:hidden;height:300px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;">
+        <div style="text-align:center;color:#64748b;">
+          <i class="fa-solid fa-map-pin" style="font-size:2.5rem;color:#ef4444;display:block;margin-bottom:.5rem;"></i>
+          <div id="mapAddress">—</div>
+        </div>
+      </div>
+      <a id="mapsLink" href="#" target="_blank" class="btn btn-primary" style="width:100%;margin-top:1rem;display:inline-flex;justify-content:center;align-items:center;gap:8px;">
+        <i class="fa-solid fa-location-arrow"></i> Open in Google Maps
+      </a>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let allServices = [];
+    let engineers   = [];
+
+    document.addEventListener('DOMContentLoaded', loadAll);
+
+    async function loadAll() {
+      await Promise.all([loadServices(), loadEngineers()]);
+    }
+
+    // ── Load service requests ──────────────────────────────────────
+    async function loadServices() {
+      try {
+        const res  = await fetch('/api/services');
+        allServices = await res.json();
+        renderServices(allServices);
+      } catch(e) {
+        document.getElementById('serviceBody').innerHTML =
+          '<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:2rem;">Failed to load service requests.</td></tr>';
+      }
+    }
+
+    function renderServices(list) {
+      document.getElementById('reqCount').textContent = list.length + ' request(s)';
+      const tbody = document.getElementById('serviceBody');
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:3rem;color:var(--text-muted);">
+          <i class="fa-solid fa-clipboard-list" style="font-size:2.5rem;opacity:.2;display:block;margin-bottom:.75rem;"></i>
+          <strong>No service requests found.</strong><br>
+          <span style="font-size:.85rem;">Customer requests will appear here once submitted.</span>
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(s => {
+        const sid      = '#SRV-' + s._id.slice(-6).toUpperCase();
+        const date     = s.preferredDate || '—';
+        const priClass = s.priority === 'Emergency' ? 'priority-emergency' : s.priority === 'High' ? 'priority-high' : 'priority-normal';
+        const priIcon  = s.priority === 'Emergency' ? '🚨 ' : s.priority === 'High' ? '⚠️ ' : '';
+        const badgeCls = s.status === 'Completed' ? 'badge-completed'
+                       : s.status === 'Assigned'  ? 'badge-assigned'
+                       : s.status === 'In Progress' ? 'badge-progress'
+                       : 'badge-pending';
+        const assignedTo = s.engineerName
+          ? `<div style="font-weight:600;font-size:.85rem;">${s.engineerName}</div><div style="font-size:.75rem;color:var(--text-muted);">${s.engineerContact || ''}</div>`
+          : `<span style="color:#94a3b8;font-size:.82rem;">Not assigned</span>`;
+
+        // Buttons
+        const assignBtn = s.status !== 'Completed' && s.status !== 'Cancelled'
+          ? `<button class="btn btn-sm btn-primary" onclick="openAssignModal('${s._id}')">
+               <i class="fa-solid fa-user-plus"></i> ${s.engineerName ? 'Reassign' : 'Assign'}
+             </button>` : '';
+
+        return `<tr id="srow-${s._id}">
+          <td style="font-family:monospace;font-size:.82rem;">${sid}</td>
+          <td>
+            <div style="font-weight:700;">${s.name}</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">${s.phone}</div>
+          </td>
+          <td style="font-size:.85rem;">${s.address || '—'}</td>
+          <td style="font-size:.85rem;font-weight:600;">${s.serviceType}</td>
+          <td style="font-size:.83rem;">${date}</td>
+          <td class="${priClass}" style="font-size:.83rem;">${priIcon}${s.priority || 'Normal'}</td>
+          <td><span class="badge ${badgeCls}">${s.status}</span></td>
+          <td>${assignedTo}</td>
+          <td>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+              ${assignBtn}
+              <button class="btn btn-sm" style="background:#f1f5f9;border:1px solid var(--border-color);" onclick="openStatusModal('${s._id}','${s.status}')">
+                <i class="fa-solid fa-pen"></i> Status
+              </button>
+              ${s.address ? `<button class="btn btn-sm" style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;" onclick="openMapModal('${s.address}','${s.name}')">
+                <i class="fa-solid fa-map-pin"></i>
+              </button>` : ''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function filterRequests(status, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      if (status === 'all') { renderServices(allServices); return; }
+      renderServices(allServices.filter(s => s.status === status));
+    }
+
+    // ── Load engineers into dropdown ───────────────────────────────
+    async function loadEngineers() {
+      try {
+        const res = await fetch('/api/auth/engineers');
+        engineers = await res.json();
+        populateEngineerSelect();
+      } catch(e) { console.error('Engineer load error', e); }
+    }
+
+    function populateEngineerSelect() {
+      const sel = document.getElementById('assignEngineerId');
+      if (!engineers.length) {
+        sel.innerHTML = '<option value="" disabled>No engineers registered yet</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="" disabled selected>Select engineer...</option>' +
+        engineers.map((e, i) =>
+          `<option value="${e._id}">ENG-${String(i+1).padStart(3,'0')} · ${e.name} · ${e.phone || e.email}</option>`
+        ).join('');
+    }
+
+    // ── Open assign modal ─────────────────────────────────────────
+    function openAssignModal(serviceId) {
+      const srv = allServices.find(s => s._id === serviceId);
+      if (!srv) return;
+
+      document.getElementById('assignServiceId').value = serviceId;
+      document.getElementById('assignPriority').value  = srv.priority || 'Normal';
+      document.getElementById('modalServiceInfo').innerHTML = `
+        <div style="font-weight:700;margin-bottom:4px;">${srv.serviceType} — ${srv.name}</div>
+        <div style="font-size:.85rem;color:var(--text-muted);">${srv.description}</div>
+        <div style="font-size:.82rem;margin-top:4px;"><i class="fa-solid fa-location-dot" style="color:#ef4444;"></i> ${srv.address || 'No address'} &nbsp;|&nbsp; 📅 ${srv.preferredDate || 'No date'}</div>
+      `;
+
+      // Pre-select current engineer if assigned
+      if (srv.engineerId?._id || srv.engineerId) {
+        const currentId = typeof srv.engineerId === 'object' ? srv.engineerId._id : srv.engineerId;
+        document.getElementById('assignEngineerId').value = currentId;
+      } else {
+        document.getElementById('assignEngineerId').value = '';
+      }
+
+      openModal('assignModal');
+    }
+
+    async function submitAssignment(e) {
+      e.preventDefault();
+      const btn       = document.getElementById('assignSubmitBtn');
+      const serviceId = document.getElementById('assignServiceId').value;
+      const engineerId = document.getElementById('assignEngineerId').value;
+      const priority  = document.getElementById('assignPriority').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Assigning...';
+
+      try {
+        const token = localStorage.getItem('userToken');
+        const res   = await fetch('/api/services/assign/' + serviceId, {
+          method : 'PUT',
+          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+          body   : JSON.stringify({ engineerId, priority })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showToast('✅ Engineer assigned successfully!');
+          closeModal('assignModal');
+          loadServices(); // Refresh the table
+        } else {
+          showToast('Error: ' + (data.message || data.error), '#ef4444');
+        }
+      } catch(err) {
+        showToast('Network error.', '#ef4444');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Assign & Dispatch Engineer';
+      }
+    }
+
+    // ── Status update modal ────────────────────────────────────────
+    function openStatusModal(serviceId, currentStatus) {
+      document.getElementById('statusServiceId').value = serviceId;
+      document.getElementById('newStatus').value = currentStatus;
+      openModal('statusModal');
+    }
+
+    async function submitStatusUpdate(e) {
+      e.preventDefault();
+      const serviceId = document.getElementById('statusServiceId').value;
+      const status    = document.getElementById('newStatus').value;
+
+      try {
+        const token = localStorage.getItem('userToken');
+        const res   = await fetch('/api/services/update/' + serviceId, {
+          method : 'PUT',
+          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
+          body   : JSON.stringify({ status })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showToast('Status updated to "' + status + '"');
+          closeModal('statusModal');
+          loadServices();
+        } else {
+          showToast('Error: ' + (data.message || data.error), '#ef4444');
+        }
+      } catch(err) {
+        showToast('Network error.', '#ef4444');
+      }
+    }
+
+    // ── Map modal ──────────────────────────────────────────────────
+    function openMapModal(address, customerName) {
+      document.getElementById('mapInfo').innerHTML =
+        `<p style="margin-bottom:.3rem;font-weight:700;"><i class="fa-solid fa-user" style="color:#4f46e5;margin-right:6px;"></i>${customerName}</p>
+         <p style="font-size:.87rem;color:var(--text-muted);"><i class="fa-solid fa-location-dot" style="color:#ef4444;margin-right:6px;"></i>${address}</p>`;
+      document.getElementById('mapAddress').textContent = address;
+      const mapsLink = 'https://maps.google.com/?q=' + encodeURIComponent(address);
+      document.getElementById('mapsLink').href = mapsLink;
+      openModal('mapModal');
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────
+    function showToast(msg, bg='#16a34a') {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = `position:fixed;bottom:30px;right:30px;background:${bg};color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);`;
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 2800);
+    }
+  </script>
+</body>
+</html>

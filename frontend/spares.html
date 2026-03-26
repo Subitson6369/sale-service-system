@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spare Parts - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  
+  <div class="dashboard-layout">
+    
+    <!-- Admin Sidebar -->
+    <aside class="sidebar admin-only">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-desktop" style="margin-right: 10px;"></i> Admin Panel</h2>
+      </div>
+            <nav class="sidebar-nav">
+        <a href="admin-dashboard.html" class="nav-item ">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="products.html" class="nav-item ">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="services.html" class="nav-item ">
+          <i class="fa-solid fa-screwdriver-wrench"></i> Services
+        </a>
+        <a href="engineers.html" class="nav-item ">
+          <i class="fa-solid fa-user-gear"></i> Service Engineers
+        </a>
+        <a href="assign-service.html" class="nav-item ">
+          <i class="fa-solid fa-clipboard-list"></i> Assign Service
+        </a>
+        <a href="billing.html" class="nav-item ">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+        </a>
+        <a href="payments.html" class="nav-item ">
+          <i class="fa-solid fa-credit-card"></i> Payments
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding: 0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y: auto;">
+      
+      <!-- Customer Navbar -->
+      <nav class="navbar customer-only">
+        <a href="customer-dashboard.html" class="navbar-brand">
+          <img src="images/logo.png" alt="Third Eye Technologies" class="shop-logo">
+        </a>
+        <div class="navbar-menu">
+          <a href="customer-dashboard.html">Dashboard</a>
+          <a href="products.html">Products</a>
+          <a href="spares.html" class="active">Spare Parts</a>
+          <a href="services.html">Services</a>
+          <a href="billing.html">Invoices</a>
+          <a href="payments.html">Payments</a>
+          <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+      </nav>
+
+      <!-- Admin Header -->
+      <header class="header admin-only">
+        <div class="header-title">Third Eye Technologies</div>
+        <div class="header-user">
+          <span style="font-weight: 500;">Admin User</span>
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        </div>
+      </header>
+
+      <!-- Shared Content Wrapper -->
+      <div class="content-wrapper" style="max-width: 1200px; margin: 0 auto; width: 100%;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h1 class="page-title customer-only" style="margin: 0;">Genuine Spare Parts</h1>
+          <h1 class="page-title admin-only" style="margin: 0;">Manage Spare Parts</h1>
+          <!-- Admin Action -->
+          <button class="btn btn-primary admin-only" onclick="openModal('addSpareModal')">
+            <i class="fa-solid fa-plus" style="margin-right: 8px;"></i> Add Spare Part
+          </button>
+        </div>
+
+        <!-- Spares Grid -->
+        <div class="products-grid">
+          <div class="product-card">
+            <div class="product-img"><i class="fa-solid fa-memory"></i></div>
+            <div class="product-info">
+              <h3>Corsair Vengeance 16GB RAM</h3>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">DDR4 3200MHz Desktop Memory.</p>
+              <div class="product-price">₹3,450</div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-primary customer-only" style="flex: 1;" onclick="alert('Part added to cart!')"><i class="fa-solid fa-cart-plus"></i> Buy</button>
+                <button class="btn admin-only" style="flex: 1; border: 1px solid var(--border-color); background: white; color: var(--text-dark);" onclick="openModal('updateSpareModal')">Update Stock</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="product-card">
+            <div class="product-img"><i class="fa-solid fa-hard-drive"></i></div>
+            <div class="product-info">
+              <h3>Samsung 980 1TB NVMe SSD</h3>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">High-speed PCIe 3.0 NVMe M.2 Solid State Drive.</p>
+              <div class="product-price">₹7,200</div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-primary customer-only" style="flex: 1;" onclick="alert('Part added to cart!')"><i class="fa-solid fa-cart-plus"></i> Buy</button>
+                <button class="btn admin-only" style="flex: 1; border: 1px solid var(--border-color); background: white; color: var(--text-dark);" onclick="openModal('updateSpareModal')">Update Stock</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img"><i class="fa-solid fa-plug"></i></div>
+            <div class="product-info">
+              <h3>Dell Original 65W Charger</h3>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Compatible with Inspiron, Latitude, and Vostro laptops.</p>
+              <div class="product-price">₹1,850</div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-primary customer-only" style="flex: 1;" onclick="alert('Part added to cart!')"><i class="fa-solid fa-cart-plus"></i> Buy</button>
+                <button class="btn admin-only" style="flex: 1; border: 1px solid var(--border-color); background: white; color: var(--text-dark);" onclick="openModal('updateSpareModal')">Update Stock</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Admin Modals -->
+  <div class="modal" id="addSpareModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Add New Spare Part</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="event.preventDefault(); alert('Spare Part Added!'); closeModal('addSpareModal');">
+        <div class="form-group">
+          <label>Part Name / Model</label>
+          <input type="text" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select class="form-control">
+             <option>Storage</option>
+             <option>Memory</option>
+             <option>Power</option>
+             <option>Display</option>
+             <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (₹)</label>
+          <input type="number" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Initial Stock</label>
+          <input type="number" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save Spare Part</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="updateSpareModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;">Update Spare Stock</h3>
+        <button class="modal-close"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <form onsubmit="event.preventDefault(); alert('Stock Updated!'); closeModal('updateSpareModal');">
+        <div class="form-group">
+          <label>Add Stock Quantity</label>
+          <input type="number" class="form-control" required placeholder="e.g. 10">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

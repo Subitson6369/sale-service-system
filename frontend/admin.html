@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <i class="fas fa-store"></i> Sales & Service
+    </a>
+    <div class="navbar-links">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="products.html"><i class="fas fa-box"></i> Products</a>
+      <button class="theme-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+      </button>
+      <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </nav>
+
+<div class="container main-content">
+    <section id="stats">
+      <h2 class="mb-3"><i class="fas fa-chart-line"></i> Dashboard</h2>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3><i class="fas fa-rupee-sign"></i> Total Revenue</h3>
+        <div class="number" id="totalRevenue">₹0</div>
+      </div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <h3><i class="fas fa-file-invoice"></i> Total Invoices</h3>
+        <div class="number" id="totalInvoices">0</div>
+      </div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+        <h3><i class="fas fa-box"></i> Total Products</h3>
+        <div class="number" id="totalProducts">0</div>
+      </div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+        <h3><i class="fas fa-tools"></i> Service Requests</h3>
+        <div class="number" id="totalServices">0</div>
+      </div>
+    </div>
+
+    <!-- Revenue Chart -->
+    <div class="card slide-up mb-3">
+      <h2><i class="fas fa-chart-bar"></i> Revenue Overview</h2>
+      <div class="chart-container">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Add Product Form -->
+    <div class="card slide-up mb-3">
+      <h2><i class="fas fa-plus-circle"></i> Add New Product</h2>
+      <form onsubmit="addProduct(event)">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div class="form-group">
+            <label><i class="fas fa-box"></i> Product Name</label>
+            <input type="text" id="productName" required placeholder="Enter product name">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-tag"></i> Category</label>
+            <select id="productCategory" required>
+              <option value="">Select category</option>
+              <option value="Computer">Computer</option>
+              <option value="Laptop">Laptop</option>
+              <option value="Printer">Printer</option>
+              <option value="CCTV">CCTV</option>
+              <option value="Accessory">Accessory</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-rupee-sign"></i> Price</label>
+            <input type="number" id="productPrice" required placeholder="Enter price" min="0">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-boxes"></i> Stock</label>
+            <input type="number" id="productStock" required placeholder="Enter stock quantity" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-align-left"></i> Description</label>
+          <textarea id="productDescription" rows="2" placeholder="Product description (optional)"></textarea>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-image"></i> Product Image <small>(optional, jpg/png/webp <5MB)</small></label>
+          <input type="file" id="productImage" accept="image/jpeg,image/png,image/webp">
+          <img id="imagePreview" class="image-preview hidden" />
+        </div>
+        <div id="productError" class="alert alert-error hidden"></div>
+        <div id="productSuccess" class="alert alert-success hidden"></div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Add Product
+        </button>
+      </form>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card slide-up mb-3">
+      <h2><i class="fas fa-shopping-cart"></i> Recent Orders</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="8" class="text-center"><div class="loading"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Services Table -->
+    <div class="card slide-up mb-3">
+      <h2><i class="fas fa-tools"></i> Service Requests</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="servicesTableBody">
+            <tr><td colspan="6" class="text-center"><div class="loading"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Products Management -->
+    <div class="card slide-up">
+      <h2><i class="fas fa-boxes"></i> Product Inventory</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+<tr>
+              <th>ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody">
+            <tr><td colspan="6" class="text-center"><div class="loading"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script src="js/ui.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    let revenueChart = null;
+
+
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      
+      if (!token || role !== 'admin') {
+        window.location.href = 'login.html';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadDashboardStats() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        // Load billing stats
+        const billingResponse = await fetch('http://localhost:5000/api/billing/stats', {
+          headers: { 'Authorization': token }
+        });
+        const billingData = await billingResponse.json();
+        
+        document.getElementById('totalRevenue').textContent = '₹' + (billingData.totalRevenue || 0).toLocaleString();
+        document.getElementById('totalInvoices').textContent = billingData.totalInvoices || 0;
+
+        // Load products count
+        const productsResponse = await fetch('http://localhost:5000/api/products');
+        const products = await productsResponse.json();
+        document.getElementById('totalProducts').textContent = products.length;
+
+        // Load services count
+        const servicesResponse = await fetch('http://localhost:5000/api/services');
+        const services = await servicesResponse.json();
+        document.getElementById('totalServices').textContent = services.length;
+
+        // Load revenue chart data
+        loadRevenueChart();
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    async function loadRevenueChart() {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/billing', {
+          headers: { 'Authorization': token }
+        });
+        const bills = await response.json();
+
+        // Group bills by month
+        const monthlyRevenue = {};
+        bills.forEach(bill => {
+          const date = new Date(bill.createdAt);
+          const month = date.toLocaleString('default', { month: 'short' });
+          monthlyRevenue[month] = (monthlyRevenue[month] || 0) + bill.totalAmount;
+        });
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        
+        if (revenueChart) {
+          revenueChart.destroy();
+        }
+
+        revenueChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(monthlyRevenue),
+            datasets: [{
+              label: 'Revenue (₹)',
+              data: Object.values(monthlyRevenue),
+              backgroundColor: 'rgba(37, 99, 235, 0.8)',
+              borderColor: 'rgba(37, 99, 235, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error loading chart:', error);
+      }
+    }
+
+function previewImage() {
+      const fileInput = document.getElementById('productImage');
+      const preview = document.getElementById('imagePreview');
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.src = e.target.result;
+          preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.classList.add('hidden');
+      }
+    }
+
+document.getElementById('productImage').addEventListener('change', previewImage);
+
+async function addProduct(event) {
+      event.preventDefault();
+      
+      const token = localStorage.getItem('token');
+      const name = document.getElementById('productName').value;
+      const category = document.getElementById('productCategory').value;
+      const price = parseInt(document.getElementById('productPrice').value);
+      const stock = parseInt(document.getElementById('productStock').value);
+      const description = document.getElementById('productDescription').value;
+      const errorDiv = document.getElementById('productError');
+      const successDiv = document.getElementById('productSuccess');
+      const imageFile = document.getElementById('productImage').files[0];
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('category', category);
+      formData.append('price', price);
+      formData.append('stock', stock);
+      formData.append('description', description);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      try {
+        const response = await fetch('http://localhost:5000/api/products/add', {
+          method: 'POST',
+          headers: { 
+            'Authorization': token
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successDiv.textContent = 'Product added successfully!';
+          successDiv.classList.remove('hidden');
+          errorDiv.classList.add('hidden');
+          
+          // Clear form
+          event.target.reset();
+          document.getElementById('imagePreview').classList.add('hidden');
+          
+          // Reload products
+          loadProducts();
+          loadDashboardStats();
+        } else {
+          errorDiv.textContent = data.message || data.error || 'Failed to add product';
+          errorDiv.classList.remove('hidden');
+          successDiv.classList.add('hidden');
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Failed to add product. Please try again.';
+        errorDiv.classList.remove('hidden');
+      }
+    }
+
+    async function loadOrders() {
+      const tbody = document.getElementById('ordersTableBody');
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/orders');
+        const orders = await response.json();
+
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center">No orders found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = orders.slice(0, 10).map(order => `
+          <tr>
+            <td>${order._id.substring(0, 8)}...</td>
+            <td>${order.customerName}</td>
+            <td>${order.product?.name || 'N/A'}</td>
+            <td>${order.quantity}</td>
+            <td>₹${order.totalAmount.toLocaleString()}</td>
+            <td>${order.paymentStatus || 'Pending'}</td>
+            <td><span class="status-${order.status.toLowerCase()}">${order.status}</span></td>
+            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading orders</td></tr>';
+      }
+    }
+
+    async function loadServices() {
+      const tbody = document.getElementById('servicesTableBody');
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/services');
+        const services = await response.json();
+
+        if (services.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center">No service requests</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = services.map(service => `
+          <tr>
+            <td>${service._id.substring(0, 8)}...</td>
+            <td>${service.name}</td>
+            <td>${service.serviceType}</td>
+            <td>${service.description.substring(0, 30)}...</td>
+            <td><span class="status-${service.status.toLowerCase().replace(' ', '-')}">${service.status}</span></td>
+            <td>
+              <select onchange="updateServiceStatus('${service._id}', this.value)" style="padding: 5px; border-radius: 4px;">
+                <option value="Pending" ${service.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="In Progress" ${service.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Completed" ${service.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              </select>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading services</td></tr>';
+      }
+    }
+
+    async function updateServiceStatus(id, status) {
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`http://localhost:5000/api/services/update/${id}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({ status })
+        });
+
+        if (response.ok) {
+          loadServices();
+        }
+      } catch (error) {
+        console.error('Error updating service:', error);
+      }
+    }
+
+    async function loadProducts() {
+      const tbody = document.getElementById('productsTableBody');
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const products = await response.json();
+
+        if (products.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center">No products found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = products.map(product => `
+              <tr>
+                <td>${product._id.substring(0, 8)}...</td>
+                <td>${product.image ? `<img src="http://localhost:5000/uploads/products/${product.image}" alt="${product.name}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">` : 'No image'}</td>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>₹${product.price.toLocaleString()}</td>
+                <td>${product.stock}</td>
+                <td>
+                  <button class="btn btn-warning btn-sm" onclick="editProduct('${product._id}')" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product._id}')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            `).join('');
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading products</td></tr>';
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      
+      const token = localStorage.getItem('token');
+      
+      try {
+        const response = await fetch(`http://localhost:5000/api/products/delete/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': token }
+        });
+
+        if (response.ok) {
+          alert('Product deleted successfully!');
+          loadProducts();
+          loadDashboardStats();
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Failed to delete product');
+        }
+      } catch (error) {
+        alert('Failed to delete product');
+      }
+    }
+
+    if (checkAuth()) {
+      loadDashboardStats();
+      loadOrders();
+      loadServices();
+      loadProducts();
+    }
+  </script>
+</body>
+</html>

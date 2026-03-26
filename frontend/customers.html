@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers - Third Eye Technologies</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="role-admin">
+  
+  <div class="dashboard-layout">
+    
+    <!-- Admin Sidebar -->
+    <aside class="sidebar admin-only">
+      <div class="sidebar-header">
+        <h2><i class="fa-solid fa-desktop" style="margin-right: 10px;"></i> Admin Panel</h2>
+      </div>
+            <nav class="sidebar-nav">
+        <a href="admin-dashboard.html" class="nav-item ">
+          <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="products.html" class="nav-item ">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="services.html" class="nav-item ">
+          <i class="fa-solid fa-screwdriver-wrench"></i> Services
+        </a>
+        <a href="engineers.html" class="nav-item ">
+          <i class="fa-solid fa-user-gear"></i> Service Engineers
+        </a>
+        <a href="assign-service.html" class="nav-item ">
+          <i class="fa-solid fa-clipboard-list"></i> Assign Service
+        </a>
+        <a href="billing.html" class="nav-item ">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Billing
+        </a>
+        <a href="payments.html" class="nav-item ">
+          <i class="fa-solid fa-credit-card"></i> Payments
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" style="padding: 0;" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow-y: auto;">
+      
+      <!-- Admin Header -->
+      <header class="header admin-only">
+        <div class="header-title">Third Eye Technologies</div>
+        <div class="header-user">
+          <span style="font-weight: 500;">Admin User</span>
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+        </div>
+      </header>
+
+      <!-- Shared Content Wrapper -->
+      <div class="content-wrapper admin-only" style="max-width: 1200px; margin: 0 auto; width: 100%;">
+        
+        <h1 class="page-title">Registered Customers</h1>
+        
+        <!-- Table Card -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Customer Database</h3>
+            <button class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Export CSV</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Email Address</th>
+                  <th>Total Spent</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Rahul Sharma</td>
+                  <td>rahul.s@example.com</td>
+                  <td>₹58,450</td>
+                  <td><span class="badge badge-success">Active</span></td>
+                  <td><button class="action-btn"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>
+                <tr>
+                  <td>Amit Verma</td>
+                  <td>amit.v@example.com</td>
+                  <td>₹11,200</td>
+                  <td><span class="badge badge-success">Active</span></td>
+                  <td><button class="action-btn"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>
+                <tr>
+                  <td>Neha Gupta</td>
+                  <td>neha.g@example.com</td>
+                  <td>₹14,400</td>
+                  <td><span class="badge badge-success">Active</span></td>
+                  <td><button class="action-btn"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>
+                <tr>
+                  <td>Rajesh Kumar</td>
+                  <td>rajesh.k@example.com</td>
+                  <td>₹0</td>
+                  <td><span class="badge badge-warning">Inactive</span></td>
+                  <td><button class="action-btn"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    if (localStorage.getItem('userRole') !== 'admin') {
+      window.location.href = 'customer-dashboard.html';
+    }
+  </script>
+</body>
+</html>
