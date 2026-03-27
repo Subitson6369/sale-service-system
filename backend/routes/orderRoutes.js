@@ -92,7 +92,7 @@ paymentDetails: { upiId, cardNumber, expiry, cvv },
 });
 
 // Get Orders by status
-router.get("/pending", async (req, res) => {
+router.get("/pending", authMiddleware, adminOnly, async (req, res) => {
   try {
     const orders = await Order.find({ status: "Pending" }).populate("product").sort({ createdAt: -1 });
     res.json(orders);
@@ -102,7 +102,7 @@ router.get("/pending", async (req, res) => {
 });
 
 // Revenue + Stats for admin dashboard (now includes daily chart data)
-router.get("/stats", async (req, res) => {
+router.get("/stats", authMiddleware, adminOnly, async (req, res) => {
   try {
     const orders = await Order.find().populate("product");
     const totalOrders   = orders.length;
@@ -154,9 +154,6 @@ router.put("/complete/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-const { authMiddleware, adminOnly } = require("../middleware/authMiddleware");
 
 // Get orders
 router.get("/", authMiddleware, async (req, res) => {
