@@ -391,6 +391,12 @@
             geoSuccess.style.display = 'block';
             coordsText.textContent = lat.toFixed(4) + '° N, ' + lng.toFixed(4) + '° E';
             
+            // Add to address field
+            const gpsString = `[GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}]`;
+            const addressField = document.getElementById('custAddress');
+            let cleanAddress = addressField.value.replace(/\[GPS:.*?\]/g, '').trim();
+            addressField.value = (cleanAddress ? cleanAddress + '\n' : '') + gpsString;
+
             // Embed free Google Maps iframe for that location
             mapIframe.src = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
             mapFrame.style.display = 'block';
@@ -403,6 +409,11 @@
             // Realistic fallback location (Navi Mumbai) if user blocks location or uses generic localhost
             const demoLat = 19.0330;
             const demoLng = 73.0297;
+            const gpsString = `[GPS: ${demoLat}, ${demoLng}] (Demo Fallback)`;
+            const addressField = document.getElementById('custAddress');
+            let cleanAddress = addressField.value.replace(/\[GPS:.*?\]/g, '').trim();
+            addressField.value = (cleanAddress ? cleanAddress + '\n' : '') + gpsString;
+
             coordsText.textContent = demoLat + '° N, ' + demoLng + '° E (Demo Fallback)';
             
             mapIframe.src = `https://maps.google.com/maps?q=${demoLat},${demoLng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
