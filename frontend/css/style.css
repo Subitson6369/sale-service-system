@@ -345,6 +345,7 @@ select.form-control {
   padding: 1rem 1.5rem;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
 }
 
 .table th {
@@ -541,6 +542,11 @@ body.role-admin .admin-only {
   display: block !important;
 }
 
+body.role-admin td.admin-only, 
+body.role-admin th.admin-only {
+  display: table-cell !important;
+}
+
 body.role-admin span.admin-only {
   display: inline !important;
 }
@@ -551,6 +557,11 @@ body.role-admin div.admin-only.flex-container {
 
 body.role-customer .customer-only {
   display: block !important;
+}
+
+body.role-customer td.customer-only,
+body.role-customer th.customer-only {
+  display: table-cell !important;
 }
 
 body.role-customer span.customer-only {
@@ -568,6 +579,11 @@ body.role-customer nav.customer-only {
 
 body.role-engineer .engineer-only {
   display: block !important;
+}
+
+body.role-engineer td.engineer-only,
+body.role-engineer th.engineer-only {
+  display: table-cell !important;
 }
 
 body.role-engineer span.engineer-only {
