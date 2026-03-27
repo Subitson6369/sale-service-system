@@ -4,10 +4,23 @@ const Bill = require("../models/Bill");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const sendEmail = require("../utils/email");
-const { adminOnly } = require("../middleware/authMiddleware");
+const { authMiddleware, adminOnly } = require("../middleware/authMiddleware");
 
 // Add order
 router.post("/add", async (req, res) => {
+  let userId = null;
+  // Try to extract user from token if provided
+  const authHeader = req.header("Authorization");
+  if (authHeader) {
+    try {
+      const token = authHeader.replace("Bearer ", "");
+      const verified = require("jsonwebtoken").verify(token, process.env.JWT_SECRET || "fallback-secret");
+      userId = verified.id;
+    } catch (e) {
+      console.log("Token verification failed in order add:", e.message);
+    }
+  }
+
   try {
 const { customerName, productId, quantity, paymentMethod = 'Cash', upiId, cardNumber, expiry, cvv, phone, address, email } = req.body;
 
@@ -28,6 +41,7 @@ const { customerName, productId, quantity, paymentMethod = 'Cash', upiId, cardNu
 
     const order = new Order({
       customerName,
+      user: userId,
       product: productId,
       quantity,
       totalAmount: amount,
@@ -46,6 +60,7 @@ paymentDetails: { upiId, cardNumber, expiry, cvv },
 
     const bill = new Bill({
       customerName,
+      user: userId,
       type: "Product",
       referenceId: order._id,
       amount,
@@ -141,10 +156,13 @@ router.put("/complete/:id", async (req, res) => {
 });
 
 
+const { authMiddleware, adminOnly } = require("../middleware/authMiddleware");
+
 // Get orders
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const orders = await Order.find().populate("product");
+    const filter = req.user.role === "admin" ? {} : { user: req.user.id };
+    const orders = await Order.find(filter).populate("product");
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -585,7 +585,10 @@
         try {
           const res  = await fetch('/api/orders/add', {
             method : 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+            },
             body   : JSON.stringify(payload)
           });
           const data = await res.json();
@@ -617,7 +620,10 @@
         if (r.order?._id) {
           fetch('/api/orders/complete/' + r.order._id, {
             method : 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+            },
             body   : JSON.stringify({ paymentMethod: 'Cash' })
           }).catch(e => console.warn('Cash complete error', e));
         }
@@ -644,7 +650,10 @@
         try {
           const res  = await fetch('/api/orders/add', {
             method : 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+            },
             body   : JSON.stringify(payload)
           });
           const data = await res.json();
@@ -654,7 +663,10 @@
             if (payMethod !== 'Cash' && savedOrder?._id) {
               await fetch('/api/orders/complete/' + savedOrder._id, {
                 method : 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                },
                 body   : JSON.stringify({ paymentMethod: payMethod })
               }).catch(e => console.warn('Complete error', e));
             }

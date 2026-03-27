@@ -430,7 +430,10 @@
     // ── Order List View ───────────────────────────────────────────────
     async function loadAllOrders() {
       try {
-        const res = await fetch('/api/orders');
+        const token = localStorage.getItem('userToken');
+        const res = await fetch('/api/orders', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
         const orders = await res.json();
         const el = document.getElementById('ordersList');
 
@@ -477,7 +480,10 @@
     async function loadOrderInvoice(orderId) {
       try {
         // Try to get the specific order from the full list
-        const res = await fetch('/api/orders');
+        const token = localStorage.getItem('userToken');
+        const res = await fetch('/api/orders', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
         const orders = await res.json();
         const order = orders.find(o => o._id === orderId);
 
