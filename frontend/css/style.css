@@ -733,3 +733,294 @@ body.role-customer aside.sidebar.customer-only {
   margin: 0.5rem 0;
 }
 
+/* ========================================
+   GLOBAL RESPONSIVE UTILITIES
+======================================== */
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Card grid utility */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Generic two-column responsive grid */
+.responsive-two-col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Table container - ensures horizontal scroll on small screens */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ========================================
+   HAMBURGER BUTTON
+======================================== */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dark);
+  font-size: 1.4rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: var(--transition);
+  line-height: 1;
+  margin-right: 0.75rem;
+}
+.hamburger-btn:hover {
+  background-color: var(--background-color);
+}
+
+/* Hamburger in navbar (non-sidebar pages) */
+.navbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 1.4rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+/* ========================================
+   SIDEBAR OVERLAY
+======================================== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 98;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ========================================
+   TABLET MEDIA QUERY (max-width: 1024px)
+======================================== */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .invoice-card {
+    padding: 2rem;
+  }
+  .content-wrapper {
+    padding: 1.5rem;
+  }
+}
+
+/* ========================================
+   MOBILE MEDIA QUERY (max-width: 768px)
+======================================== */
+@media (max-width: 768px) {
+
+  /* --- Sidebar --- */
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    height: 100vh;
+    z-index: 99;
+    transition: left 0.3s ease;
+    width: 260px;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+  }
+  .sidebar.active {
+    left: 0;
+  }
+
+  /* --- Main content --- */
+  .main-content {
+    margin-left: 0 !important;
+  }
+  .content-wrapper {
+    padding: 1rem;
+  }
+
+  /* --- Role-based sidebar override --- */
+  body.role-admin aside.sidebar.admin-only,
+  body.role-engineer aside.sidebar.engineer-only,
+  body.role-customer aside.sidebar.customer-only {
+    display: flex !important;
+    position: fixed;
+    left: -280px;
+  }
+  body.role-admin aside.sidebar.admin-only.active,
+  body.role-engineer aside.sidebar.engineer-only.active,
+  body.role-customer aside.sidebar.customer-only.active {
+    left: 0;
+  }
+
+  /* --- Hamburger --- */
+  .hamburger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .navbar-hamburger {
+    display: inline-block;
+  }
+
+  /* --- Generic two-column grid --- */
+  .responsive-two-col {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* --- Stats grid --- */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* --- Card grid --- */
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* --- Products grid --- */
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* --- Tables --- */
+  .table-container,
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table th,
+  .table td {
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+  }
+
+  /* --- Navbar (standalone pages) --- */
+  .navbar {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .navbar-menu,
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    margin-top: 0.25rem;
+  }
+  .navbar-menu.open,
+  .navbar-links.open {
+    display: flex;
+  }
+  .navbar-menu a,
+  .navbar-links a,
+  .navbar-links button {
+    padding: 0.5rem 0;
+    width: 100%;
+    text-align: left;
+  }
+
+  /* --- Auth card --- */
+  .auth-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  /* --- Invoice --- */
+  .invoice-card {
+    padding: 1.25rem;
+    margin: 0;
+  }
+  .invoice-header {
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .invoice-details {
+    text-align: left;
+  }
+
+  /* --- Hero section --- */
+  .hero {
+    padding: 3.5rem 1.25rem;
+  }
+  .hero-title {
+    font-size: 2rem;
+    line-height: 1.25;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  .hero-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-buttons .btn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.875rem 1.5rem;
+  }
+
+  /* --- Section title --- */
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .landing-section {
+    padding: 3rem 1.25rem;
+  }
+
+  /* --- Forms --- */
+  .btn {
+    width: 100%;
+  }
+  .btn-sm {
+    width: auto;
+  }
+  .top-bar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* --- Modal --- */
+  .modal-content {
+    max-width: calc(100vw - 2rem);
+    margin: 1rem;
+  }
+
+  /* --- Page title --- */
+  .page-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+}

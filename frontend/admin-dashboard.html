@@ -43,7 +43,12 @@
     <!-- Main Content -->
     <main class="main-content">
       <header class="header">
-        <div class="header-title">Third Eye Technologies</div>
+        <div style="display:flex;align-items:center;">
+          <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="header-title">Third Eye Technologies</div>
+        </div>
         <div class="header-user">
           <span style="font-weight:500;" id="adminName">Admin</span>
           <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
@@ -98,7 +103,7 @@
         </div>
 
         <!-- Orders Table + Quick Actions -->
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;" class="responsive-two-col">
 
           <!-- Pending Orders Table -->
           <div class="table-card">
@@ -151,6 +156,10 @@
     </main>
   </div>
 
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <script src="js/responsive.js"></script>
   <script src="js/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
